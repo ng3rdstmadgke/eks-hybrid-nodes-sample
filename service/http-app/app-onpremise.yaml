@@ -2,16 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: http-app
+  namespace: http-app
+  name: app-hybrid
 spec:
   selector:
     matchLabels:
-      app: http-app
+      app: app-hybrid
   replicas: 3
   template:
     metadata:
       labels:
-        app: http-app
+        app: app-hybrid
     spec:
       containers:
         - name: app
@@ -34,58 +35,17 @@ spec:
                     operator: In
                     values:
                       - hybrid
-      tolerations:
-        - key: hybrid-nodes.agc.jp/node-type
-          operator: Equal
-          value: onpremise
-          effect: NoSchedule
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: http-app-svc
-spec:
-  type: ClusterIP
-  selector:
-    app: http-app
-  ports:
-    - port: 80
-      targetPort: 80
-      protocol: TCP
 ---
 apiVersion: v1
 kind: Service
 metadata:
   namespace: http-app
-  name: echo-svc
+  name: app-hybrid-svc
 spec:
-  type: ClusterIP # Cluster IP
+  type: ClusterIP
   selector:
-    app: echo-app
+    app: app-hybrid
   ports:
-    - name: svc-port
-      port: 80
-      targetPort: app-port
+    - port: 80
+      targetPort: 80
       protocol: TCP
-#---
-#apiVersion: networking.k8s.io/v1
-#kind: Ingress
-#metadata:
-#  namespace: sample01
-#  name: echo
-#  annotations:
-#    alb.ingress.kubernetes.io/scheme: internet-facing
-#    alb.ingress.kubernetes.io/target-type: ip
-#spec:
-#  ingressClassName: alb
-#  rules:
-#    - http:
-#        paths:
-#          - path: /
-#            pathType: Prefix
-#            backend:
-#              service:
-#                name: echo-svc
-#                port:
-#                  name: svc-port
-#

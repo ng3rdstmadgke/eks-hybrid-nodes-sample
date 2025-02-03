@@ -10,12 +10,12 @@ resource "local_file" "http_app_cloud" {
   )
 }
 
-resource "local_file" "http_app_onpremise" {
-  filename = "${var.project_dir}/service/http-app/tmp/ingress-onpremise.yaml"
+resource "local_file" "http_app_hybrid" {
+  filename = "${var.project_dir}/service/http-app/tmp/ingress-hybrid.yaml"
   content = templatefile(
     "${path.module}/ingress.yaml",
     {
-      node_type = "onpremise"
+      node_type = "hybrid"
       subnets = join(",", var.alb_subnet_ids)
       alb_ingress_sg = var.alb_ingress_sg
     }

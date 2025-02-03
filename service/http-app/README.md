@@ -12,6 +12,6 @@ kubectl apply -f $PROJECT_DIR/service/http-app/tmp/ingress-cloud.yaml
 
 ```bash
 kubectl apply -f $PROJECT_DIR/service/http-app/namespace.yaml
-kubectl apply -f $PROJECT_DIR/service/http-app/app-onpremise.yaml
-kubectl apply -f $PROJECT_DIR/service/http-app/tmp/ingress-onpremise.yaml
+kubectl apply -f $PROJECT_DIR/service/http-app/app-hybrid.yaml
+kubectl apply -f $PROJECT_DIR/service/http-app/tmp/ingress-hybrid.yaml
 ```
