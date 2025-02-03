@@ -6,7 +6,7 @@ COMMON_BACKEND_CONFIG := $(SCRIPT_DIR)/terraform/components/tfvars/backend.tfvar
 COMMON_TFVARS := $(SCRIPT_DIR)/terraform/components/tfvars/common.tfvars
 COMPONENT_DIR := $(SCRIPT_DIR)/terraform/components/$(COMPONENT)
 COMPONENT_TFVARS=$(COMPONENT_DIR)/tfvars/$(STAGE).tfvars
-TFPLAN_DIR := $(SCRIPT_DIR)/.tfplan/$(COMPONENT)/
+TFPLAN_DIR := $(SCRIPT_DIR)/.tfplan/$(STAGE)/$(COMPONENT)
 
 .PHONY: option-parser
 option-parser:

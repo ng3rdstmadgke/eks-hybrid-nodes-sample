@@ -288,10 +288,3 @@ resource "aws_iam_openid_connect_provider" "default" {
     "sts.amazonaws.com",
   ]
 }
-
-
-module "eks_hybrid_node_role" {
-  source  = "terraform-aws-modules/eks/aws//modules/hybrid-node-role"
-  version = "~> 20.31"
-  name = "${var.cluster_name}-HybridNodeRole"
-}

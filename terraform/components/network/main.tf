@@ -53,3 +53,25 @@ module "vpc" {
     "kubernetes.io/role/internal-elb" = "1"
   }
 }
+
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_vpc_peering_connection" "this" {
+  peer_owner_id = data.aws_caller_identity.current.account_id
+  vpc_id        = var.requester_vpc_id
+  peer_vpc_id   = module.vpc.vpc_id
+  auto_accept = true
+
+  accepter {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  requester {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  tags = {
+    Name = "${local.cluster_name}"
+  }
+}

@@ -33,6 +33,11 @@ variable "public_subnets" {
   description = "パブリックサブネットのCIDR"
 }
 
+variable "requester_vpc_id" {
+  type = string
+  description = "VPC Peeringのリクエスター側のVPC ID"
+}
+
 locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
 }
