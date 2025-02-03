@@ -31,6 +31,8 @@ module cluster {
   cluster_name = local.cluster_name
   subnet_ids = local.private_subnet_ids
   access_entries = var.access_entries
+  vpc_id = local.vpc_id
+  hybrid_network_cidrs = var.hybrid_network_cidrs
 }
 
 

@@ -192,17 +192,14 @@ resource "aws_eks_cluster" "this" {
       "0.0.0.0/0"
     ]
     // コントロールプレーンとワーカーノード間の通信を許可するためのSG
-    security_group_ids = []
+    security_group_ids = [aws_security_group.eks_cluster_additional_sg.id]
     // ワーカーノードが配置されるサブネット (コントロールプレーンとの通信のため、cross-account ENIが作成される)
     subnet_ids = var.subnet_ids
   }
 
   remote_network_config {
     remote_node_networks {
-      cidrs = [
-        "10.53.11.0/24",
-        "10.53.21.0/24",
-      ]
+      cidrs = var.hybrid_network_cidrs
     }
     remote_pod_networks {
       cidrs = ["172.30.0.0/16"]
@@ -287,4 +284,33 @@ resource "aws_iam_openid_connect_provider" "default" {
   client_id_list = [
     "sts.amazonaws.com",
   ]
+}
+
+/**
+ * 追加のセキュリティグループ
+ */
+resource "aws_security_group" "eks_cluster_additional_sg" {
+  name        = "${var.cluster_name}-EKSClusterAdditionalSG"
+  description = "Allow hybrid nodes access."
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "Allow HTTP access."
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = var.hybrid_network_cidrs
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-EKSClusterAdditionalSG"
+  }
 }

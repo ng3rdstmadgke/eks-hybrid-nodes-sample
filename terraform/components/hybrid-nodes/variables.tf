@@ -23,10 +23,19 @@ variable key_pair_name {
   description = "EC2インスタンスに紐づけるキーペア名"
 }
 
+variable ec2_vpc_id {
+  type = string
+  description = "EC2インスタンスを配置するVPCのID"
+}
+
+variable ec2_subnet_id {
+  type = string
+  description = "EC2インスタンスを配置するサブネットのID"
+}
+
 locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
-  private_subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids
-  vpc_id = data.terraform_remote_state.network.outputs.vpc_id
+  project_dir = data.terraform_remote_state.base.outputs.project_dir
 }
 
 // baseコンポーネントのステートを参照
@@ -37,18 +46,5 @@ data terraform_remote_state "base" {
     region = var.tfstate_region
     bucket = var.tfstate_bucket
     key    = "${var.project_name}/${var.stage}/base/terraform.tfstate"
-  }
-}
-
-// networkコンポーネントのステートを参照
-data "terraform_remote_state" "network" {
-  // https://developer.hashicorp.com/terraform/language/state/remote-state-data#argument-reference
-  backend = "s3"
-
-  config = {
-    // https://developer.hashicorp.com/terraform/language/backend/s3
-    region = var.tfstate_region
-    bucket = var.tfstate_bucket
-    key    = "${var.project_name}/${var.stage}/network/terraform.tfstate"
   }
 }

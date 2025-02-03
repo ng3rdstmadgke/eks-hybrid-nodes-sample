@@ -10,6 +10,14 @@ variable access_entries {
   type = list(string)
   description = "EKSのIAMアクセスエントリに登録するIAMユーザまたはIAMロールのARN"
 }
+variable vpc_id {
+  type = string
+  description = "EKSクラスタを作成するVPC ID"
+}
+variable hybrid_network_cidrs {
+  type = list(string)
+  description = "Hybrid Nodesを利用する場合のCIDR"
+}
 
 data "aws_caller_identity" "self" { }
 

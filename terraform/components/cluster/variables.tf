@@ -23,9 +23,15 @@ variable access_entries {
   description = "EKSのIAMアクセスエントリに登録するIAMユーザまたはIAMロールのARN"
 }
 
+variable hybrid_network_cidrs {
+  type = list(string)
+  description = "Hybrid Nodesを利用する場合のCIDR"
+}
+
 locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
   private_subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids
+  vpc_id = data.terraform_remote_state.network.outputs.vpc_id
 }
 
 // baseコンポーネントのステートを参照

@@ -33,3 +33,7 @@ data "aws_eks_cluster" "this" {
 output "remote_pod_network_cidrs" {
   value = data.aws_eks_cluster.this.remote_network_config[0].remote_pod_networks[0].cidrs
 }
+
+output "cluster_arn" {
+  value = module.cluster.eks_cluster.arn
+}
