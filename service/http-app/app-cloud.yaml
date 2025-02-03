@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: http-app
+  name: app-cloud
+spec:
+  selector:
+    matchLabels:
+      app: app-cloud
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: app-cloud
+    spec:
+      containers:
+        - name: app
+          image: kennethreitz/httpbin:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "125m"
+              memory: "50Mi"
+            requests:
+              cpu: "125m"
+              memory: "50Mi"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: eks.amazonaws.com/nodegroup
+                    operator: Exists
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: http-app
+  name: app-cloud-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: app-cloud
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP

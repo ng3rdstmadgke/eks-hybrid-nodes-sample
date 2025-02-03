@@ -225,7 +225,7 @@ resource "aws_eks_cluster" "this" {
 
   // vpc-cni, kube-proxy, corednsといったアドオンを管理対象外のアドオンとしてクラスタ作成時にインストールするか
   // NOTE: この値を変更すると新しいクラスタが強制的に作成されるので注意
-  bootstrap_self_managed_addons = false
+  bootstrap_self_managed_addons = true
 
   // CloudWatchLogsに出力するコントロールプレーンのログ設定: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
   enabled_cluster_log_types = [ "api", "audit", "authenticator", "controllerManager", "scheduler" ]

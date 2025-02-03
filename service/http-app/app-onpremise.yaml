@@ -1,0 +1,91 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-app
+spec:
+  selector:
+    matchLabels:
+      app: http-app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: http-app
+    spec:
+      containers:
+        - name: app
+          image: kennethreitz/httpbin:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "125m"
+              memory: "50Mi"
+            requests:
+              cpu: "125m"
+              memory: "50Mi"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: eks.amazonaws.com/compute-type
+                    operator: In
+                    values:
+                      - hybrid
+      tolerations:
+        - key: hybrid-nodes.agc.jp/node-type
+          operator: Equal
+          value: onpremise
+          effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http-app-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: http-app
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: http-app
+  name: echo-svc
+spec:
+  type: ClusterIP # Cluster IP
+  selector:
+    app: echo-app
+  ports:
+    - name: svc-port
+      port: 80
+      targetPort: app-port
+      protocol: TCP
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  namespace: sample01
+#  name: echo
+#  annotations:
+#    alb.ingress.kubernetes.io/scheme: internet-facing
+#    alb.ingress.kubernetes.io/target-type: ip
+#spec:
+#  ingressClassName: alb
+#  rules:
+#    - http:
+#        paths:
+#          - path: /
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: echo-svc
+#                port:
+#                  name: svc-port
+#

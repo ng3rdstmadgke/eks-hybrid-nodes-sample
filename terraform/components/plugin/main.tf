@@ -29,3 +29,9 @@ module albc {
   vpc_id = local.vpc_id
   project_dir = local.project_dir
 }
+
+module calico {
+  source = "../../modules/plugin/calico"
+  project_dir = local.project_dir
+  remote_pod_network_cidrs = local.remote_pod_network_cidrs
+}

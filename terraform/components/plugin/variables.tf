@@ -22,6 +22,7 @@ locals {
   project_dir = data.terraform_remote_state.base.outputs.project_dir
   cluster_name = data.terraform_remote_state.cluster.outputs.cluster_name
   vpc_id = data.terraform_remote_state.network.outputs.vpc_id
+  remote_pod_network_cidrs = data.terraform_remote_state.cluster.outputs.remote_pod_network_cidrs
 }
 
 data terraform_remote_state "base" {
