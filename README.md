@@ -14,7 +14,41 @@ make tf-plan STAGE=dev COMPONENT=network
 make tf-apply STAGE=dev COMPONENT=network
 ```
 
+### ソフトウェアルーターのセットアップ
+
+`~.ssh/config`
+
+```~.ssh/config
+Host beex-hybrid-node-router
+  HostName 10.80.1.109
+  User ubuntu
+  IdentityFile ~/.ssh/beex-midorikawa.pem
+```
+
+
+```bash
+ssh beex-hybrid-node-router
+```
+
+ルーターインスタンスの中の操作
+
+```bash
+sudo su -
+apt update && apt upgrade -y
+
+# IPフォワーディング
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+sysctl -p  # 適用
+sysctl -a  # 確認
+```
+
+
+### ルートテーブルの編集
+
 ルートテーブルにVPCピアリングの設定を手動でいれる
+
+
+
 
 
 ## クラスタコンポーネント
@@ -93,13 +127,27 @@ aws ssm create-activation \
 
 ### ハイブリッドノードセットアップ
 
+OSセットアップ
+
+```bash
+sudo su -
+
+# パッケージアップデート
+apt update && apt upgrade -y
+
+# IPフォワーディング
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+sysctl -p  # 適用
+sysctl -a  # 確認
+```
+
 nodeadmインストール
 
 
 ```bash
 curl -OL 'https://hybrid-assets.eks.amazonaws.com/releases/latest/bin/linux/amd64/nodeadm'
-sudo mv nodeadm /usr/local/bin/
-sudo chmod 755 /usr/local/bin/nodeadm
+mv nodeadm /usr/local/bin/
+chmod 755 /usr/local/bin/nodeadm
 ```
 
 設定ファイル作成
@@ -126,8 +174,6 @@ EOF
 初期化
 
 ```bash
-sudo apt update && sudo apt upgrade -y
-
 CLUSTER_VERSION=1.31
 sudo nodeadm install $CLUSTER_VERSION --credential-provider ssm
 

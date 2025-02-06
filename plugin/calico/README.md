@@ -7,3 +7,8 @@ helm upgrade --install calico projectcalico/tigera-operator \
   --namespace kube-system \
   -f $PROJECT_DIR/plugin/calico/tmp/values.yaml
 ```
+
+
+```bash
+helm uninstall calico -n kube-system
+```
