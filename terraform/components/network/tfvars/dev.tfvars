@@ -9,3 +9,4 @@ public_subnets = [
   "10.80.102.0/24",
   "10.80.103.0/24",
 ]
+key_pair_name = "beex-midorikawa"

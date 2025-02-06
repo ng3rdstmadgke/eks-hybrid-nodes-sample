@@ -13,3 +13,7 @@ output "private_subnet_ids" {
 output "public_subnet_ids" {
   value = module.vpc.public_subnets
 }
+
+output hybrid_node_router_ip {
+  value = aws_instance.hybrid_node_router.private_ip
+}
