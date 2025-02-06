@@ -186,7 +186,7 @@ resource "aws_eks_cluster" "this" {
     // EKSのプライベートAPIエンドポイントの有効化
     endpoint_private_access = true
     // EKSのパブリックAPIエンドポイントの有効化
-    endpoint_public_access = true
+    endpoint_public_access = false
     // パブリックAPIエンドポイントにアクセス可能なネットワーク
     public_access_cidrs = [
       "0.0.0.0/0"
