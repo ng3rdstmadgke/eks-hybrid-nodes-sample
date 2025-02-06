@@ -32,6 +32,8 @@ locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
   private_subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids
   vpc_id = data.terraform_remote_state.network.outputs.vpc_id
+  hybrid_nodes_remote_network_cidrs = data.terraform_remote_state.base.outputs.hybrid_nodes_remote_network_cidrs
+  hybrid_nodes_remote_pod_network_cidrs = data.terraform_remote_state.base.outputs.hybrid_nodes_remote_pod_network_cidrs
 }
 
 // baseコンポーネントのステートを参照

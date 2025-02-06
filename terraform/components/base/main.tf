@@ -15,10 +15,31 @@ terraform {
   }
 }
 
+data "aws_subnet" "hybrid_node_subnets" {
+  for_each = toset(var.hybrid_nodes_subnet_ids)
+  id = each.value
+}
+
 output "cluster_name" {
   value = "${var.project_name}-${var.stage}"
 }
 
 output "project_dir" {
   value = abspath("${path.module}/../../..")
+}
+
+output "hybrid_nodes_vpc_id" {
+  value = var.hybrid_nodes_vpc_id
+}
+
+output "hybrid_nodes_subnet_ids" {
+  value = var.hybrid_nodes_subnet_ids
+}
+
+output "hybrid_nodes_remote_network_cidrs" {
+  value = [for subnet in data.aws_subnet.hybrid_node_subnets : subnet.cidr_block]
+}
+
+output "hybrid_nodes_remote_pod_network_cidrs" {
+  value = var.hybrid_nodes_remote_pod_network_cidrs
 }

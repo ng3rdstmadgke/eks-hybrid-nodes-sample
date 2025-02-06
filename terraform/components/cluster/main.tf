@@ -32,7 +32,8 @@ module cluster {
   subnet_ids = local.private_subnet_ids
   access_entries = var.access_entries
   vpc_id = local.vpc_id
-  hybrid_network_cidrs = var.hybrid_network_cidrs
+  hybrid_nodes_remote_network_cidrs = local.hybrid_nodes_remote_network_cidrs
+  hybrid_nodes_remote_pod_network_cidrs = local.hybrid_nodes_remote_pod_network_cidrs
 }
 
 

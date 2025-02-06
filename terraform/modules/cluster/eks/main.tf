@@ -199,10 +199,10 @@ resource "aws_eks_cluster" "this" {
 
   remote_network_config {
     remote_node_networks {
-      cidrs = var.hybrid_network_cidrs
+      cidrs = var.hybrid_nodes_remote_network_cidrs
     }
     remote_pod_networks {
-      cidrs = ["172.30.0.0/16"]
+      cidrs = var.hybrid_nodes_remote_pod_network_cidrs
     }
   }
 
@@ -299,7 +299,7 @@ resource "aws_security_group" "eks_cluster_additional_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = var.hybrid_network_cidrs
+    cidr_blocks = var.hybrid_nodes_remote_network_cidrs
   }
 
   egress {

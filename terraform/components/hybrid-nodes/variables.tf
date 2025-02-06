@@ -23,19 +23,13 @@ variable key_pair_name {
   description = "EC2インスタンスに紐づけるキーペア名"
 }
 
-variable ec2_vpc_id {
-  type = string
-  description = "EC2インスタンスを配置するVPCのID"
-}
-
-variable ec2_subnet_id {
-  type = string
-  description = "EC2インスタンスを配置するサブネットのID"
-}
-
 locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
   project_dir = data.terraform_remote_state.base.outputs.project_dir
+  hybrid_nodes_vpc_id = data.terraform_remote_state.base.outputs.hybrid_nodes_vpc_id
+  hybrid_nodes_subnet_ids = data.terraform_remote_state.base.outputs.hybrid_nodes_subnet_ids
+  hybrid_nodes_remote_network_cidrs = data.terraform_remote_state.base.outputs.hybrid_nodes_remote_network_cidrs
+  hybrid_nodes_remote_pod_network_cidrs = data.terraform_remote_state.base.outputs.hybrid_nodes_remote_pod_network_cidrs
 }
 
 // baseコンポーネントのステートを参照

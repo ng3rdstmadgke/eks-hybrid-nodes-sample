@@ -47,7 +47,7 @@ resource "aws_eks_access_entry" "hybrid_node" {
 resource "aws_security_group" "hybrid_node" {
   name        = "${local.cluster_name}-HybridNodeSG"
   description = "Allow HTTP, HTTPS access."
-  vpc_id      = var.ec2_vpc_id
+  vpc_id      = local.hybrid_nodes_vpc_id
 
   ingress {
     description = "Allow All access."
@@ -76,7 +76,7 @@ resource "aws_instance" "hybrid_node_01" {
   ami           = "ami-0a290015b99140cd1"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250115
   instance_type = "t3a.large"
 
-  subnet_id = var.ec2_subnet_id
+  subnet_id = local.hybrid_nodes_subnet_ids[0]
   enable_primary_ipv6 = false
   key_name = var.key_pair_name
   vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]

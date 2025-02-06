@@ -14,9 +14,14 @@ variable vpc_id {
   type = string
   description = "EKSクラスタを作成するVPC ID"
 }
-variable hybrid_network_cidrs {
+variable hybrid_nodes_remote_network_cidrs {
   type = list(string)
-  description = "Hybrid Nodesを利用する場合のCIDR"
+  description = "Hybrid NodesのリモートネットワークCIDR"
+}
+
+variable hybrid_nodes_remote_pod_network_cidrs {
+  type = list(string)
+  description = "Hybrid NodesのリモートPodネットワークCIDR"
 }
 
 data "aws_caller_identity" "self" { }
