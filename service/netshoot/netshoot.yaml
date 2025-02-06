@@ -31,3 +31,38 @@ spec:
               - matchExpressions:
                   - key: eks.amazonaws.com/nodegroup
                     operator: Exists
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netshoot-hybrid
+spec:
+  selector:
+    matchLabels:
+      app: netshoot-hybrid
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: netshoot-hybrid
+    spec:
+      containers:
+        - name: netshoot
+          image: nicolaka/netshoot
+          command: ["sleep", "infinity"]
+          resources:
+            limits:
+              cpu: "125m"
+              memory: "100Mi"
+            requests:
+              cpu: "125m"
+              memory: "100Mi"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: eks.amazonaws.com/compute-type
+                    operator: In
+                    values:
+                      - hybrid
