@@ -38,11 +38,6 @@ variable "requester_vpc_id" {
   description = "VPC Peeringのリクエスター側のVPC ID"
 }
 
-variable "key_pair_name" {
-  type = string
-  description = "EC2インスタンスに紐づけるキーペア名"
-}
-
 locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
 }
