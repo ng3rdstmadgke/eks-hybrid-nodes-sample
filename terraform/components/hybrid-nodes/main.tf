@@ -38,24 +38,7 @@ resource "aws_eks_access_entry" "hybrid_node" {
   cluster_name = local.cluster_name
   principal_arn = module.eks_hybrid_node_role.arn
   type = "HYBRID_LINUX"
-  #kubernetes_groups = ["system:nodes"]
 }
-
-#resource "aws_eks_access_policy_association" "hybrid_node" {
-#  // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association
-#  cluster_name = local.cluster_name
-#  // アクセスポリシー: https://docs.aws.amazon.com/ja_jp/eks/latest/userguide/access-policies.html#access-policy-permissions
-#  policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-#  principal_arn = each.key
-#
-#  access_scope {
-#    type = "cluster"
-#  }
-#
-#  depends_on = [
-#    module.cluster
-#  ]
-#}
 
 
 /**
@@ -97,6 +80,9 @@ resource "aws_instance" "hybrid_node_01" {
   enable_primary_ipv6 = false
   key_name = var.key_pair_name
   vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
+  # 送信元/送信先チェックを無効化
+  # インスタンスが送受信するパケットの送信元/送信先アドレスをチェックするかどうかを指定します。
+  source_dest_check = false
 
   root_block_device {
     volume_size = 128
