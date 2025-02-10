@@ -22,10 +22,3 @@ provider "aws" {
     }
   }
 }
-
-module keycloak {
-  source = "../../modules/service/http_app"
-  project_dir = local.project_dir
-  alb_subnet_ids = local.public_subnet_ids
-  alb_ingress_sg = local.alb_ingress_sg
-}

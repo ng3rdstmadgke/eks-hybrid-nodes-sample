@@ -3,9 +3,11 @@
 ```bash
 kubectl apply -f $PROJECT_DIR/service/http-app/namespace.yaml
 kubectl apply -f $PROJECT_DIR/service/http-app/app-cloud.yaml
-kubectl apply -f $PROJECT_DIR/service/http-app/tmp/ingress-cloud.yaml
+```
 
-kubectl delete -f $PROJECT_DIR/service/http-app/tmp/ingress-cloud.yaml
+削除
+
+```bash
 kubectl delete -f $PROJECT_DIR/service/http-app/app-cloud.yaml
 ```
 
@@ -16,8 +18,10 @@ kubectl delete -f $PROJECT_DIR/service/http-app/app-cloud.yaml
 ```bash
 kubectl apply -f $PROJECT_DIR/service/http-app/namespace.yaml
 kubectl apply -f $PROJECT_DIR/service/http-app/app-hybrid.yaml
-kubectl apply -f $PROJECT_DIR/service/http-app/tmp/ingress-hybrid.yaml
+```
 
-kubectl delete -f $PROJECT_DIR/service/http-app/tmp/ingress-hybrid.yaml
+削除
+
+```bash
 kubectl delete -f $PROJECT_DIR/service/http-app/app-hybrid.yaml
 ```

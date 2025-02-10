@@ -90,11 +90,38 @@ resource "aws_instance" "hybrid_node_01" {
     encrypted = true
     delete_on_termination = true
     tags = {
-      Name = "${local.cluster_name}-HybridNode"
+      Name = "${local.cluster_name}-HybridNode01"
     }
   }
 
   tags = {
-    Name = "${local.cluster_name}-HybridNode"
+    Name = "${local.cluster_name}-HybridNode01"
+  }
+}
+
+resource "aws_instance" "hybrid_node_02" {
+  ami           = "ami-0a290015b99140cd1"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250115
+  instance_type = "t3.large"
+
+  subnet_id = local.hybrid_nodes_subnet_ids[1]
+  enable_primary_ipv6 = false
+  key_name = var.key_pair_name
+  vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
+  # 送信元/送信先チェックを無効化
+  # インスタンスが送受信するパケットの送信元/送信先アドレスをチェックするかどうかを指定します。
+  source_dest_check = false
+
+  root_block_device {
+    volume_size = 128
+    volume_type = "gp3"
+    encrypted = true
+    delete_on_termination = true
+    tags = {
+      Name = "${local.cluster_name}-HybridNode02"
+    }
+  }
+
+  tags = {
+    Name = "${local.cluster_name}-HybridNode02"
   }
 }

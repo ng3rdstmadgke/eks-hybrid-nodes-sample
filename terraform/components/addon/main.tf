@@ -23,6 +23,13 @@ provider "aws" {
   }
 }
 
+resource "aws_eks_addon" "coredns" {
+  cluster_name = local.cluster_name
+  addon_name    = "coredns"
+  // バージョンの確認: aws eks describe-addon-versions --addon-name coredns
+  addon_version = "v1.11.4-eksbuild.2"
+}
+
 /**
  * Pod Identity Agent
  *

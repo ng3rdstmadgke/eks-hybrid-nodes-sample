@@ -54,3 +54,12 @@ data "aws_eks_cluster" "this" {
   // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster
   name = var.cluster_name
 }
+
+variable vpc_id {
+  type = string
+  description = "VPC ID"
+}
+variable hybrid_nodes_remote_network_cidrs {
+  type = list(string)
+  description = "ハイブリッドノードのリモートネットワークCIDR"
+}

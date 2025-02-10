@@ -42,10 +42,11 @@ metadata:
   namespace: http-app
   name: app-hybrid-svc
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: app-hybrid
   ports:
     - port: 80
       targetPort: 80
       protocol: TCP
+      nodePort: 30080

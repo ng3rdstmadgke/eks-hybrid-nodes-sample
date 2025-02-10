@@ -22,3 +22,14 @@ provider "aws" {
     }
   }
 }
+
+
+module "app_alb" {
+  source = "../../modules/load-balancer/alb"
+  alb_name = "HttpApp"
+  cluster_name = local.cluster_name
+  vpc_id = local.vpc_id
+  subnet_ids = local.public_subnet_ids
+  target_ips = local.hybrid_node_ips
+  target_port = 30080
+}

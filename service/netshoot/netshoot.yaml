@@ -40,7 +40,7 @@ spec:
   selector:
     matchLabels:
       app: netshoot-hybrid
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:

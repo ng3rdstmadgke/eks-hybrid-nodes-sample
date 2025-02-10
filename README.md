@@ -22,6 +22,21 @@ CLUSTER_NAME=$(terraform -chdir=$PROJECT_DIR/terraform/components/base output -r
 aws eks update-kubeconfig --name $CLUSTER_NAME
 ```
 
+## calicoインストール
+
+https://docs.tigera.io/calico/latest/getting-started/kubernetes/managed-public-cloud/eks
+
+```bash
+# クラスタネットワークにCalicoを利用するには aws-node DaemonSet を削除しなければならない
+kubectl delete daemonset -n kube-system aws-node
+
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/calico-vxlan.yaml
+
+# AWSインスタンスの通信元/通信先チェックを無効化する
+# https://docs.tigera.io/calico/latest/reference/resources/felixconfig#aws-integration
+kubectl -n kube-system set env daemonset/calico-node FELIX_AWSSRCDSTCHECK=DoNothing
+```
+
 # ■ ノードグループコンポーネント
 
 ```bash
@@ -44,10 +59,6 @@ make tf-plan STAGE=dev COMPONENT=plugin
 make tf-apply STAGE=dev COMPONENT=plugin
 ```
 
-## albcインストール
-
-[README.md | albc](plugin/albc/README.md)
-
 
 # ■ ハイブリッドノードコンポーネント
 
@@ -63,12 +74,16 @@ Host beex-hybrid-node-01
   HostName 10.53.11.120
   User ubuntu
   IdentityFile ~/.ssh/beex-midorikawa.pem
+
+Host beex-hybrid-node-02
+  HostName 10.53.11.120
+  User ubuntu
+  IdentityFile ~/.ssh/beex-midorikawa.pem
 ```
 
 ## ハイブリッドアクティベーション作成
 
 ```bash
-
 CLUSTER_ARN=$(terraform -chdir=$PROJECT_DIR/terraform/components/cluster output -raw cluster_arn)
 HYBRID_NODE_ROLE_ARN=$(terraform -chdir=$PROJECT_DIR/terraform/components/hybrid-nodes output -raw hybrid_node_role)
 
@@ -143,217 +158,6 @@ sudo nodeadm init -c file://nodeConfig.yaml
 sudo nodeadm debug -c file://nodeConfig.yaml
 ```
 
-# ■ ハイブリッドルーターコンポーネント
-
-```bash
-make tf-plan STAGE=dev COMPONENT=hybrid-router
-make tf-apply STAGE=dev COMPONENT=hybrid-router
-```
-## ssh設定
-
-```config
-Host beex-eks-network-router
-  HostName 10.80.1.141
-  User ubuntu
-  IdentityFile ~/.ssh/beex-midorikawa.pem
-
-Host beex-remote-network-router
-  HostName 10.53.11.208
-  User ubuntu
-  IdentityFile ~/.ssh/beex-midorikawa.pem
-```
-
-## EKSネットワーク側のルーター
-### ホストの設定
-
-```bash
-ssh beex-eks-network-router
-```
-
-```bash
-sudo su -
-
-# IPフォワーディング
-echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
-sysctl -p
-
-# vxlan作成
-REMOTE_IP=10.53.11.208
-ip link add vxlan0 type vxlan id 100 dev ens5 remote $REMOTE_IP dstport 4789
-ip addr add 172.30.0.1/16 dev vxlan0
-ip link set vxlan0 up
-
-# ルーティング設定
-CALICO_NETWORK_IP_POOL=172.30.93.0/24
-REMOTE_NETWORK_ROUTER_HOST=172.30.0.2
-ip route add $CALICO_NETWORK_IP_POOL via $REMOTE_NETWORK_ROUTER_HOST dev vxlan0
-
-# 確認
-ip a
-# 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-#     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-#     inet 127.0.0.1/8 scope host lo
-#        valid_lft forever preferred_lft forever
-#     inet6 ::1/128 scope host noprefixroute
-#        valid_lft forever preferred_lft forever
-# 2: ens5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9001 qdisc mq state UP group default qlen 1000
-#     link/ether 06:4e:d3:cd:a7:03 brd ff:ff:ff:ff:ff:ff
-#     altname enp0s5
-#     inet 10.80.1.141/24 metric 100 brd 10.80.1.255 scope global dynamic ens5
-#        valid_lft 2095sec preferred_lft 2095sec
-#     inet6 fe80::44e:d3ff:fecd:a703/64 scope link
-#        valid_lft forever preferred_lft forever
-# 5: vxlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 8951 qdisc noqueue state UNKNOWN group default qlen 1000
-#     link/ether 9e:72:8a:2b:ec:b4 brd ff:ff:ff:ff:ff:ff
-#     inet 172.30.0.1/16 scope global vxlan0
-#        valid_lft forever preferred_lft forever
-#     inet6 fe80::bc25:7dff:fedd:e4fd/64 scope link
-#        valid_lft forever preferred_lft forever
-
-ip route
-# default via 10.80.1.1 dev ens5 proto dhcp src 10.80.1.141 metric 100
-# 10.80.0.2 via 10.80.1.1 dev ens5 proto dhcp src 10.80.1.141 metric 100
-# 10.80.1.0/24 dev ens5 proto kernel scope link src 10.80.1.141 metric 100
-# 10.80.1.1 dev ens5 proto dhcp scope link src 10.80.1.141 metric 100
-# 172.30.0.0/16 dev vxlan0 proto kernel scope link src 172.30.0.1
-# 172.30.93.0/24 via 172.30.0.2 dev vxlan0
-```
-
-削除
-
-```bash
-ip route del $CALICO_NETWORK_IP_POOL
-ip link del vxlan0
-```
-
-### サブネットのルートテーブル
-
-| 送信先 | ターゲット |
-| --- | --- |
-| 0.0.0.0/0 | NATゲートウェイ |
-| 10.0.0.0/8 | トランジットゲートウェイ |
-| 10.80.0.0/16 | local |
-| 172.30.0.0/16 | EKSネットワーク側のルーターインスタンス |
-
-
-## リモートネットワーク側のルーター
-
-### ホストの設定
-
-```bash
-ssh beex-remote-network-router
-```
-
-```bash
-sudo su -
-
-# IPフォワーディング
-echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
-sysctl -p
-
-# vxlan作成
-REMOTE_IP=10.80.1.141
-ip link add vxlan0 type vxlan id 100 dev ens5 remote $REMOTE_IP dstport 4789
-ip addr add 172.30.0.2/16 dev vxlan0
-ip link set vxlan0 up
-
-# ルーティング設定
-CALICO_NETWORK_IP_POOL=172.30.93.0/24
-HYBRID_NODE_HOST=10.53.11.86
-ip route add $CALICO_NETWORK_IP_POOL via $HYBRID_NODE_HOST
-
-# 確認
-ip a
-# 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-#     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-#     inet 127.0.0.1/8 scope host lo
-#        valid_lft forever preferred_lft forever
-#     inet6 ::1/128 scope host noprefixroute
-#        valid_lft forever preferred_lft forever
-# 2: ens5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9001 qdisc mq state UP group default qlen 1000
-#     link/ether 06:ea:a3:c4:9d:b5 brd ff:ff:ff:ff:ff:ff
-#     altname enp0s5
-#     inet 10.53.11.208/24 metric 100 brd 10.53.11.255 scope global dynamic ens5
-#        valid_lft 2343sec preferred_lft 2343sec
-#     inet6 fe80::4ea:a3ff:fec4:9db5/64 scope link
-#        valid_lft forever preferred_lft forever
-# 4: vxlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 8951 qdisc noqueue state UNKNOWN group default qlen 1000
-#     link/ether 42:2d:3e:f3:ca:fc brd ff:ff:ff:ff:ff:ff
-#     inet 172.30.0.2/16 scope global vxlan0
-#        valid_lft forever preferred_lft forever
-#     inet6 fe80::2489:6cff:fe72:c84f/64 scope link
-#        valid_lft forever preferred_lft forever
-
-
-ip route
-# default via 10.53.11.1 dev ens5 proto dhcp src 10.53.11.208 metric 100
-# 10.53.0.2 via 10.53.11.1 dev ens5 proto dhcp src 10.53.11.208 metric 100
-# 10.53.11.0/24 dev ens5 proto kernel scope link src 10.53.11.208 metric 100
-# 10.53.11.1 dev ens5 proto dhcp scope link src 10.53.11.208 metric 100
-# 172.30.0.0/16 dev vxlan0 proto kernel scope link src 172.30.0.2
-# 172.30.93.0/24 via 10.53.11.86 dev ens5
-```
-
-削除
-
-```bash
-ip route del $CALICO_NETWORK_IP_POOL
-ip link del vxlan0
-```
-
-### サブネットのルートテーブル
-
-| 送信先 | ターゲット |
-| --- | --- |
-| 0.0.0.0/0 | NATゲートウェイ |
-| 10.0.0.0/8 | トランジットゲートウェイ |
-| 10.53.0.0/16 | local |
-| 172.30.0.0/16 | ハイブリッドノードのインスタンス (※ 不要かも) |
-
-
-## 疎通確認
-
-### EKSネットワークルーターから
-
-```bash
-# ハイブリッドノードへの疎通確認
-ping 10.53.11.86  # ハイブリッドノードのIP
-
-# リモートネットワークへの疎通確認
-ping 10.53.11.141  # リモートネットワークルーターのIP
-
-# VXLANの疎通確認
-ping 172.30.0.2
-
-# リモートPodネットワークへの疎通確認 (帰りのルートがないので届いていればOK)
-ping 172.30.93.133  # ハイブリッドノード上のpodのIP
-```
-
-```bash
-tcpdump -tn -i any icmp
-```
-
-### リモートネットワークルーターから
-
-```bash
-# ハイブリッドノードへの疎通確認
-ping 10.53.11.86  # ハイブリッドノードのIP
-
-# EKSネットワークへの疎通確認
-ping 10.80.1.141  # EKSネットワークルーター
-
-# VXLANの疎通確認
-ping 172.30.0.1
-
-# リモートPodネットワークへの疎通確認
-ping 172.30.93.133  # ハイブリッドノード上のpodのIP
-```
-
-```bash
-tcpdump -tn -i any icmp
-```
-
-
 # ■ サービスコンポーネント
 
 ```bash
@@ -363,3 +167,10 @@ make tf-apply STAGE=dev COMPONENT=service
 
 - [http-app](./service/http-app/README.md)
 - [netshoot](./service/netshoot/README.md)
+
+# ■ ロードバランサーコンポーネント
+
+```bash
+make tf-plan STAGE=dev COMPONENT=load-balancer
+make tf-apply STAGE=dev COMPONENT=load-balancer
+```

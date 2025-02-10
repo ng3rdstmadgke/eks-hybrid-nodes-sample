@@ -66,7 +66,16 @@ resource "aws_eks_access_policy_association" "admin" {
     type = "cluster"
   }
 
-  depends_on = [
-    module.cluster
-  ]
+  depends_on = [ module.cluster ]
+}
+
+resource "aws_eks_addon" "kube_proxy" {
+  // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon
+
+  cluster_name = local.cluster_name
+  addon_name   = "kube-proxy"
+  // バージョンの確認: aws eks describe-addon-versions --addon-name kube-proxy
+  addon_version = "v1.31.2-eksbuild.3"
+
+  depends_on = [ module.cluster ]
 }
