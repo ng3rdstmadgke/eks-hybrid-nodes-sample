@@ -174,3 +174,17 @@ make tf-apply STAGE=dev COMPONENT=service
 make tf-plan STAGE=dev COMPONENT=load-balancer
 make tf-apply STAGE=dev COMPONENT=load-balancer
 ```
+
+# 削除
+
+```bash
+make tf-destroy STAGE=dev COMPONENT=load-balancer && \
+make tf-destroy STAGE=dev COMPONENT=service && \
+make tf-destroy STAGE=dev COMPONENT=hybrid-nodes && \
+make tf-destroy STAGE=dev COMPONENT=plugin && \
+make tf-destroy STAGE=dev COMPONENT=addon && \
+make tf-destroy STAGE=dev COMPONENT=node-group && \
+make tf-destroy STAGE=dev COMPONENT=cluster && \
+make tf-destroy STAGE=dev COMPONENT=network && \
+make tf-destroy STAGE=dev COMPONENT=base
+```
