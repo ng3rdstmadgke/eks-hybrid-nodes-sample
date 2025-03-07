@@ -23,17 +23,12 @@ variable access_entries {
   description = "EKSのIAMアクセスエントリに登録するIAMユーザまたはIAMロールのARN"
 }
 
-variable hybrid_network_cidrs {
-  type = list(string)
-  description = "Hybrid Nodesを利用する場合のCIDR"
-}
-
 locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
-  private_subnet_ids = data.terraform_remote_state.network.outputs.private_subnet_ids
-  vpc_id = data.terraform_remote_state.network.outputs.vpc_id
-  hybrid_nodes_remote_network_cidrs = data.terraform_remote_state.base.outputs.hybrid_nodes_remote_network_cidrs
-  hybrid_nodes_remote_pod_network_cidrs = data.terraform_remote_state.base.outputs.hybrid_nodes_remote_pod_network_cidrs
+  cluster_vpc_id = data.terraform_remote_state.network.outputs.cluster_vpc_id
+  cluster_private_subnet_ids = data.terraform_remote_state.network.outputs.cluster_private_subnet_ids
+  hybrid_nodes_remote_network_cidrs = data.terraform_remote_state.network.outputs.hybrid_nodes_remote_network_cidrs
+  hybrid_nodes_remote_pod_network_cidrs = ["172.30.0.0/16"]
 }
 
 // baseコンポーネントのステートを参照

@@ -29,3 +29,7 @@ output "onpremise_private_subnet_ids" {
 output "onpremise_public_subnet_ids" {
   value = module.onpremise_vpc.public_subnets
 }
+
+output "hybrid_nodes_remote_network_cidrs" {
+  value = local.onpremise_private_subnets
+}

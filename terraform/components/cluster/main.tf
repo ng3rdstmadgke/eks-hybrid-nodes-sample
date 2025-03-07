@@ -29,9 +29,9 @@ provider "aws" {
 module cluster {
   source = "../../modules/cluster/eks"
   cluster_name = local.cluster_name
-  subnet_ids = local.private_subnet_ids
+  vpc_id = local.cluster_vpc_id
+  subnet_ids = local.cluster_private_subnet_ids
   access_entries = var.access_entries
-  vpc_id = local.vpc_id
   hybrid_nodes_remote_network_cidrs = local.hybrid_nodes_remote_network_cidrs
   hybrid_nodes_remote_pod_network_cidrs = local.hybrid_nodes_remote_pod_network_cidrs
 }
