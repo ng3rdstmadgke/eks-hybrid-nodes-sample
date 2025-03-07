@@ -45,6 +45,18 @@ module "cluster_vpc" {
   enable_vpn_gateway = false
 }
 
+resource "aws_route" "cluster_private_subnet" {
+  route_table_id = module.cluster_vpc.private_route_table_ids[0]
+  destination_cidr_block = "10.0.0.0/8"
+  transit_gateway_id = var.transit_gateway_id
+}
+
+resource "aws_route" "cluster_public_subnet" {
+  route_table_id = module.cluster_vpc.public_route_table_ids[0]
+  destination_cidr_block = "10.0.0.0/8"
+  transit_gateway_id = var.transit_gateway_id
+}
+
 resource "aws_ec2_transit_gateway_vpc_attachment" "cluster_vpc" {
   subnet_ids         = module.cluster_vpc.private_subnets
   transit_gateway_id = var.transit_gateway_id
@@ -70,15 +82,27 @@ module "onpremise_vpc" {
   version = "~> 5.17.0"
 
   name = "${local.cluster_name}-onpremise-vpc"
-  cidr = local.cluster_vpc_cidr
+  cidr = local.onpremise_vpc_cidr
 
   azs             = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
-  private_subnets = local.cluster_private_subnets
-  public_subnets  = local.cluster_public_subnets
+  private_subnets = local.onpremise_private_subnets
+  public_subnets  = local.onpremise_public_subnets
 
   enable_nat_gateway = true
   single_nat_gateway = true
   enable_vpn_gateway = false
+}
+
+resource "aws_route" "onpremise_private_subnet" {
+  route_table_id = module.onpremise_vpc.private_route_table_ids[0]
+  destination_cidr_block = "10.0.0.0/8"
+  transit_gateway_id = var.transit_gateway_id
+}
+
+resource "aws_route" "onpremise_public_subnet" {
+  route_table_id = module.onpremise_vpc.public_route_table_ids[0]
+  destination_cidr_block = "10.0.0.0/8"
+  transit_gateway_id = var.transit_gateway_id
 }
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "onpremise_vpc" {
