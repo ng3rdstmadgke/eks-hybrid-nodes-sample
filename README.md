@@ -168,7 +168,41 @@ make tf-plan STAGE=dev COMPONENT=load-balancer
 make tf-apply STAGE=dev COMPONENT=load-balancer
 ```
 
-# 削除
+# ■ 動作確認
+
+## netshoot内
+
+k9s で netshoot の shell にログイン
+
+### DNSの確認
+
+```bash
+curl "http://google.co.jp"
+```
+
+### pingの確認
+
+```bash
+# それぞれの netshoot の IP に ping を飛ばせるかを確認
+ping 192.168.xxx.xxx
+```
+
+
+### resolve.confの確認
+
+```bash
+cat /etc/resolv.conf
+# nameserver 172.20.0.10/16
+```
+
+### albの疎通確認
+
+```bash
+curl "http://hybrid-nodes-sample-dev-httpapp-xxxxxxxxx.ap-northeast-1.elb.amazonaws.com/"
+```
+
+
+# ■ 削除
 
 ```bash
 make tf-destroy STAGE=dev COMPONENT=load-balancer && \
