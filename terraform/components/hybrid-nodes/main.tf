@@ -42,12 +42,12 @@ resource "aws_eks_access_entry" "hybrid_node" {
 
 
 /**
- * ハイブリッドノードインスタンス
+ * セキュリティグループ
  */
 resource "aws_security_group" "hybrid_node" {
   name        = "${local.cluster_name}-HybridNodeSG"
   description = "Allow HTTP, HTTPS access."
-  vpc_id      = local.hybrid_nodes_vpc_id
+  vpc_id      = local.onpremise_vpc_id
 
   ingress {
     description = "Allow All access."
@@ -72,11 +72,14 @@ resource "aws_security_group" "hybrid_node" {
 }
 
 
+/**
+ * ハイブリッドノードインスタンス
+ */
 resource "aws_instance" "hybrid_node_01" {
-  ami           = "ami-0a290015b99140cd1"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250115
+  ami           = "ami-026c39f4021df9abe"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305
   instance_type = "t3a.large"
 
-  subnet_id = local.hybrid_nodes_subnet_ids[0]
+  subnet_id = local.onpremise_private_subnet_ids[0]
   enable_primary_ipv6 = false
   key_name = var.key_pair_name
   vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
@@ -100,10 +103,10 @@ resource "aws_instance" "hybrid_node_01" {
 }
 
 resource "aws_instance" "hybrid_node_02" {
-  ami           = "ami-0a290015b99140cd1"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250115
+  ami           = "ami-026c39f4021df9abe"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305
   instance_type = "t3.large"
 
-  subnet_id = local.hybrid_nodes_subnet_ids[1]
+  subnet_id = local.onpremise_private_subnet_ids[1]
   enable_primary_ipv6 = false
   key_name = var.key_pair_name
   vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
@@ -124,4 +127,53 @@ resource "aws_instance" "hybrid_node_02" {
   tags = {
     Name = "${local.cluster_name}-HybridNode02"
   }
+}
+
+resource "aws_instance" "hybrid_node_03" {
+  ami           = "ami-026c39f4021df9abe"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305
+  instance_type = "t3.large"
+
+  subnet_id = local.onpremise_private_subnet_ids[2]
+  enable_primary_ipv6 = false
+  key_name = var.key_pair_name
+  vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
+  # 送信元/送信先チェックを無効化
+  # インスタンスが送受信するパケットの送信元/送信先アドレスをチェックするかどうかを指定します。
+  source_dest_check = false
+
+  root_block_device {
+    volume_size = 128
+    volume_type = "gp3"
+    encrypted = true
+    delete_on_termination = true
+    tags = {
+      Name = "${local.cluster_name}-HybridNode02"
+    }
+  }
+
+  tags = {
+    Name = "${local.cluster_name}-HybridNode02"
+  }
+}
+
+resource "local_file" "ssh_config" {
+  filename = "${local.project_dir}/tmp/ssh_config"
+  file_permission = "0600"
+  directory_permission = "0755"
+  content = <<EOF
+Host ${local.cluster_name}-HybridNode01
+  HostName ${aws_instance.hybrid_node_01.private_ip}
+  User ubuntu
+  IdentityFile ~/.ssh/${var.key_pair_name}.pem
+
+Host ${local.cluster_name}-HybridNode02
+  HostName ${aws_instance.hybrid_node_02.private_ip}
+  User ubuntu
+  IdentityFile ~/.ssh/${var.key_pair_name}.pem
+
+Host ${local.cluster_name}-HybridNode03
+  HostName ${aws_instance.hybrid_node_03.private_ip}
+  User ubuntu
+  IdentityFile ~/.ssh/${var.key_pair_name}.pem
+EOF
 }

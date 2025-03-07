@@ -20,8 +20,8 @@ variable tfstate_region {
 
 locals {
   cluster_name = data.terraform_remote_state.cluster.outputs.cluster_name
-  vpc_id = data.terraform_remote_state.network.outputs.vpc_id
-  public_subnet_ids = data.terraform_remote_state.network.outputs.public_subnet_ids
+  cluster_vpc_id = data.terraform_remote_state.network.outputs.cluster_vpc_id
+  cluster_public_subnet_ids = data.terraform_remote_state.network.outputs.cluster_public_subnet_ids
   hybrid_node_ips = data.terraform_remote_state.hybrid_nodes.outputs.hybrid_node_ips
 }
 

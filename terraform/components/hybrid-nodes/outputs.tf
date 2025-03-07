@@ -10,6 +10,7 @@ output hybrid_node_ips {
   value = [
     aws_instance.hybrid_node_01.private_ip,
     aws_instance.hybrid_node_02.private_ip,
+    aws_instance.hybrid_node_03.private_ip,
   ]
 }
 

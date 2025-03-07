@@ -67,18 +67,12 @@ make tf-plan STAGE=dev COMPONENT=hybrid-nodes
 make tf-apply STAGE=dev COMPONENT=hybrid-nodes
 ```
 
-`~/.ssh/config`
+`~/.ssh/config` に `tmp/ssh_config` の内容を追記
 
-```~/.ssh/config
-Host beex-hybrid-node-01
-  HostName 10.53.11.120
-  User ubuntu
-  IdentityFile ~/.ssh/beex-midorikawa.pem
-
-Host beex-hybrid-node-02
-  HostName 10.53.11.120
-  User ubuntu
-  IdentityFile ~/.ssh/beex-midorikawa.pem
+```bash
+echo "" >> ~/.ssh/config
+cat $PROJECT_DIR/tmp/ssh_config >> ~/.ssh/config
+cat ~/.ssh/config 
 ```
 
 ## ハイブリッドアクティベーション作成
@@ -93,7 +87,7 @@ aws ssm create-activation \
      --description "Activation for EKS hybrid nodes" \
      --iam-role $HYBRID_NODE_ROLE_ARN \
      --tags Key=EKSClusterARN,Value=$CLUSTER_ARN \
-     --registration-limit 1
+     --registration-limit 3
 
 # ■ {
 # ■     "ActivationId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
@@ -114,7 +108,6 @@ apt update && apt upgrade -y
 # ■ IPフォワーディング
 echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 sysctl -p  # 適用
-sysctl -a  # 確認
 ```
 
 nodeadmインストール
