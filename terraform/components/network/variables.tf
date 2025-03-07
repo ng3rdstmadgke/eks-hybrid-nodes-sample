@@ -18,28 +18,35 @@ variable tfstate_region {
   description = "tfvarsが保存されているバケットのリージョン"
 }
 
-variable "vpc_cidr" {
+variable "transit_gateway_id" {
   type = string
-  description = "VPCのCIDR"
-}
-
-variable "private_subnets" {
-  type = list(string)
-  description = "プライベートサブネットのCIDR"
-}
-
-variable "public_subnets" {
-  type = list(string)
-  description = "パブリックサブネットのCIDR"
-}
-
-variable "requester_vpc_id" {
-  type = string
-  description = "VPC Peeringのリクエスター側のVPC ID"
+  description = "Transit Gateway ID"
 }
 
 locals {
   cluster_name = data.terraform_remote_state.base.outputs.cluster_name
+  cluster_vpc_cidr = "10.80.0.0/16"
+  cluster_private_subnets = [
+    "10.80.1.0/24",
+    "10.80.2.0/24",
+    "10.80.3.0/24",
+  ]
+  cluster_public_subnets = [
+    "10.80.101.0/24",
+    "10.80.102.0/24",
+    "10.80.103.0/24",
+  ]
+  onpremise_vpc_cidr = "10.90.0.0/16"
+  onpremise_private_subnets = [
+    "10.90.1.0/24",
+    "10.90.2.0/24",
+    "10.90.3.0/24",
+  ]
+  onpremise_public_subnets = [
+    "10.90.101.0/24",
+    "10.90.102.0/24",
+    "10.90.103.0/24",
+  ]
 }
 
 data terraform_remote_state "base" {
