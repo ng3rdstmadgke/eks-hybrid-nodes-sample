@@ -190,7 +190,43 @@ curl "http://hybrid-nodes-sample-dev-httpapp-xxxxxxxxx.ap-northeast-1.elb.amazon
 ```
 
 
+
 # ■ 削除
+
+## ハイブリッドノードの削除
+
+ノードをドレインする
+
+```bash
+kubectl get nodes
+# NAME                                             STATUS   ROLES    AGE     VERSION
+# ip-10-80-1-114.ap-northeast-1.compute.internal   Ready    <none>   3h1m    v1.31.4-eks-0f56d01
+# ip-10-80-2-121.ap-northeast-1.compute.internal   Ready    <none>   3h1m    v1.31.4-eks-0f56d01
+# mi-01d36f0fe6a21b30a                             Ready    <none>   21m     v1.31.5-eks-5d632ec
+# mi-048e5dab057d86c35                             Ready    <none>   22s     v1.31.5-eks-5d632ec
+# mi-0e29a10bbce6dd90f                             Ready    <none>   5m53s   v1.31.5-eks-5d632ec
+
+kubectl drain --ignore-daemonsets mi-xxxxxxxxxxxxxxxxx
+```
+
+ハイブリッドノードをアンインストールする  
+※ ssmのアクティベーションも解除される
+
+```bash
+cd $PROJECT_DIR/ansible
+STAGE=dev
+HOST_NAME=hybrid-nodes-sample-dev-node01
+
+ansible-playbook -v -i inventory_${STAGE}.yml -l $HOST_NAME playbook_uninstall.yml
+```
+
+クラスターからノードを削除する
+
+```bash
+kubectl delete node mi-xxxxxxxxxxxxxxxxx
+```
+
+## コンポーネントの削除
 
 ```bash
 make tf-destroy STAGE=dev COMPONENT=load-balancer && \

@@ -1,0 +1,5 @@
+- name: HybridNodeSetup
+  hosts: hybrid_nodes
+  become: yes
+  roles:
+    - role: uninstall
