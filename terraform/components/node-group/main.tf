@@ -38,7 +38,7 @@ module node_group_bottlerocket_1 {
   node_group_name = "ng-bottlerocket-1"
   ami_type = "BOTTLEROCKET_x86_64"
   instance_types = ["t3a.large", "t3a.xlarge", "t3.large", "t3.xlarge"] // スポット料金: https://aws.amazon.com/jp/ec2/spot/pricing/
-  desired_size = 1
+  desired_size = 2
   vpc_id = local.cluster_vpc_id
   hybrid_nodes_remote_network_cidrs = local.hybrid_nodes_remote_network_cidrs
 }
