@@ -62,3 +62,9 @@ RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | b
 RUN curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 && \
     sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd && \
     rm argocd-linux-amd64
+
+# ansible インストール
+RUN apt-get update && apt-get install -y pipx
+ENV PIPX_HOME=/home/vscode/.local/pipx
+ENV PIPX_BIN_DIR=/home/vscode/.local/bin
+RUN pipx install --include-deps ansible~=11.3.0

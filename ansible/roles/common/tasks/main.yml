@@ -1,0 +1,17 @@
+##############################
+# apt update & upgrade
+##############################
+- name: Update and upgrade APT packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: Check if a reboot is required
+  stat:
+    path: /var/run/reboot-required
+  register: reboot_required
+
+- name: Reboot the system if needed
+  reboot:
+    reboot_timeout: 600
+  when: reboot_required.stat.exists

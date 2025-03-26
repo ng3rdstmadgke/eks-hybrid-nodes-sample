@@ -1,0 +1,25 @@
+##############################
+# nodeadmインストール
+##############################
+- name: Download nodeadm binary
+  get_url:
+    url: 'https://hybrid-assets.eks.amazonaws.com/releases/v1.0.3/bin/linux/amd64/nodeadm'
+    dest: /usr/local/bin/nodeadm
+    mode: '0755'
+
+- name: nodeadm install
+  command: nodeadm -d install {{ cluster_version }} --region {{ region_name }} --credential-provider ssm
+
+##############################
+# ノード参加
+##############################
+- name: Create nodeConfig.yaml
+  template:
+    src: templates/nodeConfig.yaml
+    dest: /root/nodeConfig.yaml
+
+- name: nodeadm init
+  command: nodeadm -d init -c file:///root/nodeConfig.yaml
+
+- name: nodeadm debug
+  command: nodeadm -d debug -c file:///root/nodeConfig.yaml

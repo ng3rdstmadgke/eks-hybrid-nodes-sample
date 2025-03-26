@@ -1,0 +1,12 @@
+apiVersion: node.eks.aws/v1alpha1
+kind: NodeConfig
+spec:
+  cluster:
+    name: {{ cluster_name}}
+    region: {{ region_name }}
+    apiServerEndpoint: {{ cluster_api_endpoint }}
+    certificateAuthority: {{ cluster_certificate }}
+  hybrid:
+    ssm:
+      activationCode: "{{ activation_code }}"
+      activationId: "{{ activation_id }}"

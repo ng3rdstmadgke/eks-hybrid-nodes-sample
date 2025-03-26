@@ -1,2 +1,4 @@
 tmp/
 .tfplan/
+ansible/host_vars/*
+ansible/inventory_*.yml

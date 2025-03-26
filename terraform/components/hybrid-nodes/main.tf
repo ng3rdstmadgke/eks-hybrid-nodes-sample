@@ -25,155 +25,89 @@ provider "aws" {
 
 
 /**
- * ハイブリッドノードロール
+ * ハイブリッドノードの共通リソース
  */
-module "eks_hybrid_node_role" {
-  source  = "terraform-aws-modules/eks/aws//modules/hybrid-node-role"
-  version = "~> 20.31"
-  name = "${local.cluster_name}-HybridNode"
-}
-
-resource "aws_eks_access_entry" "hybrid_node" {
-  // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry
+module "common" {
+  source = "../../modules/hybrid-nodes/common"
   cluster_name = local.cluster_name
-  principal_arn = module.eks_hybrid_node_role.arn
-  type = "HYBRID_LINUX"
+  onpremise_vpc_id = local.onpremise_vpc_id
 }
-
-
-/**
- * セキュリティグループ
- */
-resource "aws_security_group" "hybrid_node" {
-  name        = "${local.cluster_name}-HybridNodeSG"
-  description = "Allow HTTP, HTTPS access."
-  vpc_id      = local.onpremise_vpc_id
-
-  ingress {
-    description = "Allow All access."
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-
-  tags = {
-    Name = "${local.cluster_name}-HybridNodeSG"
-  }
-}
-
 
 /**
  * ハイブリッドノードインスタンス
  */
-resource "aws_instance" "hybrid_node_01" {
-  ami           = "ami-026c39f4021df9abe"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305
-  instance_type = "t3a.large"
 
-  subnet_id = local.onpremise_private_subnet_ids[0]
-  enable_primary_ipv6 = false
-  key_name = var.key_pair_name
-  vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
-  # 送信元/送信先チェックを無効化
-  # インスタンスが送受信するパケットの送信元/送信先アドレスをチェックするかどうかを指定します。
-  source_dest_check = false
-
-  root_block_device {
-    volume_size = 128
-    volume_type = "gp3"
-    encrypted = true
-    delete_on_termination = true
-    tags = {
-      Name = "${local.cluster_name}-HybridNode01"
-    }
-  }
-
-  tags = {
-    Name = "${local.cluster_name}-HybridNode01"
-  }
+module "hybrid_node" {
+  for_each = local.hybrid_nodes
+  source = "../../modules/hybrid-nodes/ec2"
+  cluster_name = local.cluster_name
+  name = each.value.name
+  ami_id = each.value.ami_id
+  instance_type = each.value.instance_type
+  subnet_id = each.value.subnet_id
+  key_pair_name = var.key_pair_name
+  security_group_ids = [ module.common.hybrid_node_sg.id ]
 }
 
-resource "aws_instance" "hybrid_node_02" {
-  ami           = "ami-026c39f4021df9abe"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305
-  instance_type = "t3.large"
-
-  subnet_id = local.onpremise_private_subnet_ids[1]
-  enable_primary_ipv6 = false
-  key_name = var.key_pair_name
-  vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
-  # 送信元/送信先チェックを無効化
-  # インスタンスが送受信するパケットの送信元/送信先アドレスをチェックするかどうかを指定します。
-  source_dest_check = false
-
-  root_block_device {
-    volume_size = 128
-    volume_type = "gp3"
-    encrypted = true
-    delete_on_termination = true
-    tags = {
-      Name = "${local.cluster_name}-HybridNode02"
-    }
-  }
-
-  tags = {
-    Name = "${local.cluster_name}-HybridNode02"
-  }
-}
-
-resource "aws_instance" "hybrid_node_03" {
-  ami           = "ami-026c39f4021df9abe"  # ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305
-  instance_type = "t3.large"
-
-  subnet_id = local.onpremise_private_subnet_ids[2]
-  enable_primary_ipv6 = false
-  key_name = var.key_pair_name
-  vpc_security_group_ids = [ aws_security_group.hybrid_node.id ]
-  # 送信元/送信先チェックを無効化
-  # インスタンスが送受信するパケットの送信元/送信先アドレスをチェックするかどうかを指定します。
-  source_dest_check = false
-
-  root_block_device {
-    volume_size = 128
-    volume_type = "gp3"
-    encrypted = true
-    delete_on_termination = true
-    tags = {
-      Name = "${local.cluster_name}-HybridNode02"
-    }
-  }
-
-  tags = {
-    Name = "${local.cluster_name}-HybridNode02"
-  }
-}
-
+/**
+ * ssh_configファイル
+ */
 resource "local_file" "ssh_config" {
-  filename = "${local.project_dir}/tmp/ssh_config"
+  filename = "${local.project_dir}/tmp/config"
   file_permission = "0600"
   directory_permission = "0755"
-  content = <<EOF
-Host ${local.cluster_name}-HybridNode01
-  HostName ${aws_instance.hybrid_node_01.private_ip}
-  User ubuntu
-  IdentityFile ~/.ssh/${var.key_pair_name}.pem
+  content = templatefile(
+    "${path.module}/resources/config",
+    {
+      hybrid_nodes = module.hybrid_node
+      key_pair_name = var.key_pair_name
+    }
+  )
+}
 
-Host ${local.cluster_name}-HybridNode02
-  HostName ${aws_instance.hybrid_node_02.private_ip}
-  User ubuntu
-  IdentityFile ~/.ssh/${var.key_pair_name}.pem
+/**
+ * ansible用ファイル
+ */
+resource "local_file" "inventory" {
+  filename = "${local.project_dir}/ansible/inventory_${var.stage}.yml"
+  directory_permission = "0755"
+  file_permission = "0644"
+  content = templatefile(
+    "${path.module}/resources/inventory.yml",
+    {
+      stage = var.stage
+      hybrid_nodes = module.hybrid_node
+      cluster_name = local.cluster_name
+      cluster_version = local.cluster_version
+      cluster_api_endpoint = local.cluster_api_endpoint
+      cluster_certificate = local.cluster_certificate
+      key_pair_name = var.key_pair_name
+    }
+  )
+}
 
-Host ${local.cluster_name}-HybridNode03
-  HostName ${aws_instance.hybrid_node_03.private_ip}
-  User ubuntu
-  IdentityFile ~/.ssh/${var.key_pair_name}.pem
-EOF
+resource "aws_ssm_activation" "hybrid_node" {
+  for_each = module.hybrid_node
+  name = each.value.instance.hostname
+  description = "${each.value.instance.hostname} activation"
+  iam_role = module.common.hybrid_node_role.name
+  registration_limit = "1"
+  tags = {
+    Name = each.value.instance.hostname
+    EKSClusterARN = local.cluster_arn
+  }
+}
+
+resource "local_file" "host_vars" {
+  for_each = module.hybrid_node
+  filename = "${local.project_dir}/ansible/host_vars/${each.value.instance.hostname}.yml"
+  directory_permission = "0755"
+  file_permission = "0644"
+  content = templatefile(
+    "${path.module}/resources/host_vars.yml",
+    {
+      activation_id = aws_ssm_activation.hybrid_node[each.key].id
+      activation_code = aws_ssm_activation.hybrid_node[each.key].activation_code
+    }
+  )
 }

@@ -1,0 +1,10 @@
+- name: HybridNodeSetup
+  hosts: hybrid_nodes
+  become: yes
+  roles:
+    - role: common
+      tags: standard,gpu
+    - role: hybrid_node
+      tags: standard,gpu
+    - role: nvidia_driver
+      tags: gpu

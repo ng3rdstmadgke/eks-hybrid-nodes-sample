@@ -1,0 +1,6 @@
+%{ for k, v in hybrid_nodes ~}
+Host ${v.instance.hostname}
+  HostName ${v.instance.ip_address}
+  User ubuntu
+  IdentityFile ~/.ssh/${key_pair_name}.pem
+%{ endfor ~}

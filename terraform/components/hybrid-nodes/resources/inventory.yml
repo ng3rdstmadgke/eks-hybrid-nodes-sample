@@ -1,0 +1,20 @@
+all:
+  vars:
+    ansible_user: ubuntu
+    ansible_ssh_private_key_file: ~/.ssh/${key_pair_name}.pem
+    ansible_port: 22
+    ansible_connection: ssh
+    cluster_name: ${cluster_name}
+    cluster_version: ${cluster_version}
+    cluster_api_endpoint: ${cluster_api_endpoint}
+    cluster_certificate: ${cluster_certificate}
+    region_name: ap-northeast-1
+    cuda_version: "12.8"
+    cuda_toolkit: "cuda-toolkit-12-8"
+  children:
+    hybrid_nodes:
+      hosts:
+%{ for k, v in hybrid_nodes ~}
+        ${v.instance.hostname}:
+          ansible_host: ${v.instance.ip_address}
+%{ endfor ~}
