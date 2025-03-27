@@ -1,18 +1,30 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: netshoot
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: netshoot
   name: netshoot
 spec:
   selector:
     matchLabels:
       app: netshoot
-  replicas: 1
+  replicas: 5
   template:
     metadata:
       labels:
         app: netshoot
     spec:
+      topologySpreadConstraints:  # ノードに均等にPodを配置する
+        - maxSkew: 1  # 1台までの差を許容
+          topologyKey: "kubernetes.io/hostname"  # 分散対象のキー (この場合はノードごと)
+          whenUnsatisfiable: ScheduleAnyway  # DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: netshoot
       containers:
         - name: netshoot
           image: nicolaka/netshoot
@@ -24,45 +36,3 @@ spec:
             requests:
               cpu: "125m"
               memory: "100Mi"
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: eks.amazonaws.com/nodegroup
-                    operator: Exists
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: netshoot-hybrid
-spec:
-  selector:
-    matchLabels:
-      app: netshoot-hybrid
-  replicas: 3
-  template:
-    metadata:
-      labels:
-        app: netshoot-hybrid
-    spec:
-      containers:
-        - name: netshoot
-          image: nicolaka/netshoot
-          command: ["sleep", "infinity"]
-          resources:
-            limits:
-              cpu: "125m"
-              memory: "100Mi"
-            requests:
-              cpu: "125m"
-              memory: "100Mi"
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: eks.amazonaws.com/compute-type
-                    operator: In
-                    values:
-                      - hybrid
