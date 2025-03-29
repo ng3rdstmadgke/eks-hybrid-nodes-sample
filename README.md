@@ -110,15 +110,16 @@ cat ~/.ssh/config
 
 ```bash
 cd $PROJECT_DIR/ansible
+CLUSTER_NAME=$(terraform -chdir=$PROJECT_DIR/terraform/components/base output -raw cluster_name)
 STAGE=dev
 
 # -i <インベントリファイル>: インベントリファイルを設定
 # -l <対象ホスト名>: デプロイ対象ホスト名を指定
 # -v: 詳細なログを表示
 # --tags <カンマ区切りのタグ>: playbookのロールに設定したタグ
-ansible-playbook -v -i inventory_${STAGE}.yml -l hybrid-nodes-sample-dev-node01 --tags gpu playbook.yml
-ansible-playbook -v -i inventory_${STAGE}.yml -l hybrid-nodes-sample-dev-node02 --tags gpu playbook.yml
-ansible-playbook -v -i inventory_${STAGE}.yml -l hybrid-nodes-sample-dev-node03 --tags standard playbook.yml
+ansible-playbook -v -i inventory_${STAGE}.yml -l $CLUSTER_NAME-node01 --tags gpu playbook.yml
+ansible-playbook -v -i inventory_${STAGE}.yml -l $CLUSTER_NAME-node02 --tags gpu playbook.yml
+ansible-playbook -v -i inventory_${STAGE}.yml -l $CLUSTER_NAME-node03 --tags standard playbook.yml
 ```
 
 GPUノードにラベルを設定
