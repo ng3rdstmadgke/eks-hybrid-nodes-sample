@@ -76,6 +76,7 @@ resource "aws_security_group" "hybrid_node" {
   description = "Allow HTTP, HTTPS access."
   vpc_id      = var.onpremise_vpc_id
 
+  // NOTE: ノード間のvxlan(udp, port 4789)が許可されていないといけない
   ingress {
     description = "Allow All access."
     from_port   = 0
