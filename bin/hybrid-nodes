@@ -1,0 +1,32 @@
+#!/bin/bash
+
+source $PROJECT_DIR/bin/lib/utils.sh
+
+STAGE=$1
+
+if [ -z "$STAGE" ]; then
+  error "引数にステージ名を指定してください"
+fi
+
+
+ANSIBLE_HOSTS="$(
+  cat $PROJECT_DIR/ansible/inventory_$STAGE.yml | \
+  yq -r '
+    .all.children.hybrid_nodes.hosts |
+    to_entries[] |
+    "\(.value.ansible_host) \(.key)"
+  '
+)"
+
+K8S_HOSTS="$(
+  kubectl get nodes -o json | \
+  jq -r '
+    .items[] |
+    select(.metadata.name |
+    startswith("mi-")) |
+    .status.addresses |
+    "\(map(select(.type == "InternalIP"))[0].address) \(map(select(.type == "Hostname"))[0].address)"
+  '
+)"
+
+join -j 1 <(echo "$ANSIBLE_HOSTS" | sort) <(echo "$K8S_HOSTS" | sort)

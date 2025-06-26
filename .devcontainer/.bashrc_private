@@ -7,3 +7,5 @@ source <(kubectl completion bash)
 source <(helm completion bash)
 source <(argocd completion bash)
 complete -C '/usr/local/bin/terraform' terraform
+
+export PATH="$PATH:$PROJECT_DIR/bin"

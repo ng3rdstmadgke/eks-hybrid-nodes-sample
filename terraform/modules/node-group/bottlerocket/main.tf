@@ -60,6 +60,33 @@ resource "aws_iam_role_policy_attachment" "amazoneks_cni_ipv6_policy" {
   policy_arn = aws_iam_policy.amazoneks_cni_ipv6_policy.arn
 }
 
+// NOTE: CalicoのFelixプロセスがEC2インスタンスの送信元/送信先チェックを無効化するために必要な権限
+resource "aws_iam_policy" "ec2_srcdstcheck_edit_policy" {
+  name = "${var.cluster_name}-${var.node_group_name}-Ec2SrcDstCheckEditPolicy"
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:ModifyInstanceAttribute",
+          "ec2:ModifyNetworkInterfaceAttribute",
+          "ec2:DescribeInstances",
+          "ec2:DescribeNetworkInterfaces",
+        ],
+        "Resource" : [
+          "*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_srcdstcheck_edit_policy" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = aws_iam_policy.ec2_srcdstcheck_edit_policy.arn
+}
+
 resource "aws_security_group" "node_group_additional" {
   name        = "${var.cluster_name}-${var.node_group_name}-NodeGroupSG"
   description = "Allow Hybrid Nodes access."
@@ -171,6 +198,10 @@ resource "aws_eks_node_group" "this" {
   launch_template {
     id = aws_launch_template.node_instance.id
     version = aws_launch_template.node_instance.latest_version
+  }
+
+  labels = {
+    "ktamido.com/compute-type" = "ec2"
   }
 
   update_config {

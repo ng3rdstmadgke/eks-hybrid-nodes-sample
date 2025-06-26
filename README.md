@@ -27,14 +27,21 @@ aws eks update-kubeconfig --name $CLUSTER_NAME
 https://docs.tigera.io/calico/latest/getting-started/kubernetes/managed-public-cloud/eks
 
 ```bash
-# クラスタネットワークにCalicoを利用するには aws-node DaemonSet を削除しなければならない
-kubectl delete daemonset -n kube-system aws-node
+helm repo add projectcalico https://docs.tigera.io/calico/charts
+helm repo update projectcalico
 
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/calico-vxlan.yaml
+# インストール可能なチャートのバージョンをチェック
+helm search repo projectcalico --versions | grep -F -e "v3.29." -e "NAME" | head -n3
+# NAME                            CHART VERSION   APP VERSION     DESCRIPTION                            
+# projectcalico/tigera-operator   v3.29.4         v3.29.4         Installs the Tigera operator for Calico
+# projectcalico/tigera-operator   v3.29.3         v3.29.3         Installs the Tigera operator for Calico
 
-# AWSインスタンスの通信元/通信先チェックを無効化する
-# https://docs.tigera.io/calico/latest/reference/resources/felixconfig#aws-integration
-kubectl -n kube-system set env daemonset/calico-node FELIX_AWSSRCDSTCHECK=DoNothing
+CALICO_VERSION=3.29.4
+
+helm upgrade -i calico projectcalico/tigera-operator \
+    --version $CALICO_VERSION \
+    --namespace kube-system \
+    -f $PROJECT_DIR/plugin/calico/conf/values.yaml
 ```
 
 # ■ ノードグループコンポーネント
@@ -72,11 +79,12 @@ helm search repo nvdp
 # nvdp/gpu-feature-discovery      0.17.1          0.17.1          A Helm chart for gpu-feature-discovery on Kuber...
 # nvdp/nvidia-device-plugin       0.17.1          0.17.1          A Helm chart for the nvidia-device-plugin on Ku...
 
+NVIDIA_DEVICE_PLUGIN_VERSION=0.17.1
 
 helm upgrade -i nvdp nvdp/nvidia-device-plugin \
   --namespace nvidia-device-plugin \
   --create-namespace \
-  --version 0.17.1 \
+  --version $NVIDIA_DEVICE_PLUGIN_VERSION \
   -f $PROJECT_DIR/plugin/nvidia-device-plugin/values.yaml
 ```
 
@@ -126,13 +134,10 @@ GPUノードにラベルを設定
 
 ```bash
 # ノードを確認
-kubectl get nodes
-# NAME                                             STATUS   ROLES    AGE     VERSION
-# ip-10-80-1-114.ap-northeast-1.compute.internal   Ready    <none>   3h1m    v1.31.4-eks-0f56d01
-# ip-10-80-2-121.ap-northeast-1.compute.internal   Ready    <none>   3h1m    v1.31.4-eks-0f56d01
-# mi-01d36f0fe6a21b30a                             Ready    <none>   21m     v1.31.5-eks-5d632ec
-# mi-048e5dab057d86c35                             Ready    <none>   22s     v1.31.5-eks-5d632ec
-# mi-0e29a10bbce6dd90f                             Ready    <none>   5m53s   v1.31.5-eks-5d632ec
+hybrid-nodes dev
+# 10.90.1.121 hybrid-nodes-sample-dev-node01 mi-01d36f0fe6a21b30a
+# 10.90.2.253 hybrid-nodes-sample-dev-node02 mi-048e5dab057d86c35
+# 10.90.3.180 hybrid-nodes-sample-dev-node03 mi-0e29a10bbce6dd90f
 
 kubectl label nodes mi-01d36f0fe6a21b30a nvidia.com/gpu.present=true
 kubectl label nodes mi-0e29a10bbce6dd90f nvidia.com/gpu.present=true

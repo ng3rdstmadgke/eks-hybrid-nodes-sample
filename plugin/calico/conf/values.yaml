@@ -1,0 +1,59 @@
+# values.yml: https://github.com/projectcalico/calico/blob/v3.29.0/charts/tigera-operator/values.yaml
+# Helm installation reference: https://docs.tigera.io/calico/3.29/reference/installation/helm_customization
+installation: # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io/v1.InstallationSpec
+  enabled: true
+  cni:
+    type: Calico
+    ipam:
+      type: Calico
+  calicoNetwork:  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io/v1.CalicoNetworkSpec
+    bgp: Disabled
+    ipPools:  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io%2fv1.IPPool
+    - cidr: 192.168.0.0/16
+      blockSize: 26
+      encapsulation: VXLAN  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io%2fv1.EncapsulationType
+      natOutgoing: Enabled  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io/v1.NATOutgoingType
+      vxlanMode: Always  # https://docs.tigera.io/calico/3.29/reference/resources/ippool#spec
+  controlPlaneReplicas: 1
+  controlPlaneNodeSelector:
+    ktamido.com/compute-type: ec2
+  calicoKubeControllersDeployment:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            ktamido.com/compute-type: ec2
+  typhaDeployment:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            ktamido.com/compute-type: ec2
+#  calicoNodeDaemonSet:  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io/v1.CalicoNodeDaemonSet
+#    spec:
+#      template:
+#        spec:
+#          nodeSelector:
+#            eks.amazonaws.com/compute-type: hybrid
+#  csiNodeDriverDaemonSet:
+#    spec:
+#      template:
+#        spec:
+#          nodeSelector:
+#            eks.amazonaws.com/compute-type: hybrid
+
+# https://docs.tigera.io/calico/3.29/reference/resources/felixconfig#spec
+defaultFelixConfiguration: 
+  enabled: true
+  # ワークロードからのVXLANカプセル化されたトラフィックを許可
+  # https://docs.tigera.io/calico/3.29/reference/resources/felixconfig#data-plane-common
+  allowVXLANPacketsFromWorkloads: true
+  # EC2の送信元/送信先チェックを無効にする設定
+  # https://docs.tigera.io/calico/3.29/reference/resources/felixconfig#aws-integration
+  awsSrcDstCheck: Disable
+  # awsSrcDstCheck: DoNothing
+
+# tigera/operator pod のノードセレクタ
+nodeSelector:
+  kubernetes.io/os: linux
+  ktamido.com/compute-type: ec2
