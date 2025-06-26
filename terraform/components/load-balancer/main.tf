@@ -23,6 +23,16 @@ provider "aws" {
   }
 }
 
+module "ray_nlb" {
+  source             = "../../modules/load-balancer/ray"
+  short_project_name = "ehns"
+  stage              = var.stage
+  cluster_name       = local.cluster_name
+  vpc_id             = local.cluster_vpc_id
+  subnet_ids         = local.cluster_public_subnet_ids
+  target_ips         = local.hybrid_node_ips
+  port_map           = var.ray_nlb_port_map
+}
 
 module "app_alb" {
   source = "../../modules/load-balancer/alb"

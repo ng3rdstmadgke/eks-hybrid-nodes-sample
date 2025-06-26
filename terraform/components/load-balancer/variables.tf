@@ -18,6 +18,16 @@ variable tfstate_region {
   description = "tfvarsが保存されているバケットのリージョン"
 }
 
+variable "ray_nlb_port_map" {
+  type = map(
+    object({
+      lb_port = number,    # NLBが受けるポート
+      node_port = number,  # ターゲットが受けるポート(RayClusterのヘッドノードのNodePort)
+    })
+  )
+  description = "Ray Cluster用のNLBのポートマッピング"
+}
+
 locals {
   cluster_name = data.terraform_remote_state.cluster.outputs.cluster_name
   cluster_vpc_id = data.terraform_remote_state.network.outputs.cluster_vpc_id

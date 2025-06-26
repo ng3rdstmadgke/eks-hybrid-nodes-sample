@@ -1,0 +1,46 @@
+# https://github.com/ray-project/kuberay/blob/master/helm-chart/ray-cluster/values.yaml
+image:
+  repository: rayproject/ray
+  #tag: 2.41.0-py312
+  tag: 2.41.0-py312-gpu
+  pullPolicy: IfNotPresent
+
+head:
+  enableInTreeAutoscaling: true
+  autoscalerOptions:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: eks.amazonaws.com/compute-type
+              operator: In
+              values:
+                - hybrid
+worker:
+  groupName: workergroup01
+  replicas: 2
+  minReplicas: 1
+  maxReplicas: 10
+  resources:
+    limits:
+      cpu: "2"
+      memory: "6G"
+      nvidia.com/gpu: "1"
+    requests:
+      cpu: "2"
+      memory: "6G"
+      nvidia.com/gpu: "1"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: eks.amazonaws.com/compute-type
+              operator: In
+              values:
+                - hybrid
+            - key: nvidia.com/gpu.present
+              operator: Exists
+service:
+  type: NodePort

@@ -68,3 +68,9 @@ RUN apt-get update && apt-get install -y pipx
 ENV PIPX_HOME=/home/vscode/.local/pipx
 ENV PIPX_BIN_DIR=/home/vscode/.local/bin
 RUN pipx install --include-deps ansible~=11.3.0
+
+# Poetry インストール
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/home/vscode/.pypoetry python3 - && \
+    chown -R vscode:vscode /home/vscode/.pypoetry
+ENV PATH="$PATH:/home/vscode/.pypoetry/bin"
+RUN poetry self add poetry-plugin-shell

@@ -154,6 +154,7 @@ make tf-apply STAGE=dev COMPONENT=service
 - [http-app](./service/http-app/README.md)
 - [netshoot](./service/netshoot/README.md)
 - [gpu-sample](./service/gpu-sample/README.md)
+- [ray](./service/ray/README.md)
 
 # ■ ロードバランサーコンポーネント
 
