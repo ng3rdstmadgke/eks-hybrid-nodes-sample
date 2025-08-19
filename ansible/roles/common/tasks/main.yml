@@ -15,3 +15,36 @@
   reboot:
     reboot_timeout: 600
   when: reboot_required.stat.exists
+
+##############################
+# chronyのインストール
+##############################
+
+- name: Install chrony package
+  apt:
+    name: chrony
+    state: present
+    update_cache: yes
+
+- name: Ensure chrony service is enabled and restarted
+  systemd:
+    name: chrony.service
+    state: restarted
+    enabled: yes
+
+##############################
+# calicoctl インストール
+# https://docs.tigera.io/calico/latest/operations/calicoctl/install
+##############################
+- name: Install required packages
+  apt:
+    name:
+      - ipset
+    state: present
+    update_cache: yes
+
+- name: Download calicoctl binary
+  get_url:
+    url: https://github.com/projectcalico/calico/releases/download/v3.29.4/calicoctl-linux-amd64
+    dest: /usr/local/bin/calicoctl
+    mode: '0755'

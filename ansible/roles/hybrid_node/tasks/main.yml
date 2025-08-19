@@ -21,5 +21,10 @@
 - name: nodeadm init
   command: nodeadm -d init -c file:///root/nodeConfig.yaml
 
+# NOTE: すぐに, Debug nodeadm with config file すると、k8s 側の準備が終わり切らないため、30秒待つ
+- name: Wait for 30 seconds
+  ansible.builtin.pause:
+    seconds: 30
+
 - name: nodeadm debug
   command: nodeadm -d debug -c file:///root/nodeConfig.yaml
