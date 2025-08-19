@@ -96,7 +96,7 @@ resource "aws_lb_target_group_attachment" "this" {
     for e in local.tg_attachments : e.key => e
   }
 
-  target_group_arn  = aws_lb_target_group.common_tg[each.value.target_key].arn
+  target_group_arn  = aws_lb_target_group.this[each.value.target_key].arn
   target_id         = each.value.ip
   port              = each.value.port
   availability_zone = "all"
@@ -113,75 +113,66 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+// aws_lb_listener_rule: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule
+# resource "aws_lb_listener_rule" "http_hostname" {
+#   for_each = var.targets
+#   listener_arn = aws_lb_listener.http.arn
+# 
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.this[each.key].arn
+#   }
+# 
+#   condition {
+#     host_header {
+#       values = [each.value.domain]
+#     }
+#   }
+# }
+
+# TODO: HTTPS対応
+/**
+ * ALBのリスナー (HTTPS)
+ * aws_lb_listener: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
+ */
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.this.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.certificate_arn
+
+  default_action {
     type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
       status_code = 404
     }
   }
-
-  # TODO: HTTPS対応したら443にリダイレクト
-  # default_action {
-  #   type = "redirect"
-  #   redirect {
-  #     port        = "443"
-  #     protocol    = "HTTPS"
-  #     status_code = "HTTP_301"
-  #   }
-  # }
 }
 
 // aws_lb_listener_rule: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule
-resource "aws_lb_listener_rule" "http_hostname" {
+resource "aws_lb_listener_rule" "https_hostname" {
   for_each = var.targets
-  listener_arn = aws_lb_listener.http.arn
+  listener_arn = aws_lb_listener.https.arn
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.common_tg[each.key].arn
+    target_group_arn = aws_lb_target_group.this[each.key].arn
   }
 
   condition {
     host_header {
-      values = ["${each.value.subdomain}.${var.domain}"]
+      values = [each.value.domain]
     }
   }
 }
-
-# TODO: HTTPS対応
-# /**
-#  * ALBのリスナー (HTTPS)
-#  * aws_lb_listener: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
-#  */
-# resource "aws_lb_listener" "https" {
-#   load_balancer_arn = aws_lb.common.arn
-#   port              = "443"
-#   protocol          = "HTTPS"
-#   ssl_policy        = "ELBSecurityPolicy-2016-08"
-#   certificate_arn   = var.certificate_arn
-# 
-#   default_action {
-#     type = "fixed-response"
-#     fixed_response {
-#       content_type = "text/plain"
-#       status_code = 404
-#     }
-#   }
-# }
-# 
-# // aws_lb_listener_rule: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule
-# resource "aws_lb_listener_rule" "https_hostname" {
-#   for_each = var.targets
-#   listener_arn = aws_lb_listener.https.arn
-# 
-#   action {
-#     type             = "forward"
-#     target_group_arn = aws_lb_target_group.common_tg[each.key].arn
-#   }
-# 
-#   condition {
-#     host_header {
-#       values = ["${each.value.subdomain}.${var.domain}"]
-#     }
-#   }
-# }

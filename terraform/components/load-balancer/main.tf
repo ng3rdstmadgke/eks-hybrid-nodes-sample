@@ -41,8 +41,8 @@ module "common_alb" {
   short_project_name = local.short_project_name
   stage              = var.stage
   cluster_name       = local.cluster_name
-  vpc_id             = local.vpc_id
-  subnet_ids         = local.subnet_ids
-  domain             = var.alb_domain
+  vpc_id             = local.cluster_vpc_id
+  subnet_ids         = local.cluster_public_subnet_ids
+  certificate_arn    = var.alb_certificate_arn
   targets            = var.alb_targets
 }

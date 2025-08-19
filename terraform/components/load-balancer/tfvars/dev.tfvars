@@ -1,27 +1,28 @@
 ray_nlb_port_map = {
-  py312-client    = {lb_port = 10001, node_port = 30898},
-  py312-dashboard = {lb_port = 10002, node_port = 32175},
+  py312-client    = {lb_port = 10001, node_port = 30919},
 }
+
+alb_certificate_arn = "arn:aws:acm:ap-northeast-1:xxxxxxxxxxxx:certificate/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 alb_targets = {
   ray-py312-dashboard = {
     ips               = [
-      "xxx.xxx.xxx.xxx",  // hybrid node IP
-      "xxx.xxx.xxx.xxx",  // hybrid node IP
-      "xxx.xxx.xxx.xxx",  // hybrid node IP
+      "10.90.1.52",
+      "10.90.2.161",
+      "10.90.3.111",
     ]
-    port              = 32169,
-    subdomain         = "ray-py312-dashboard",
+    port              = 31373,
+    domain            = "ray-py312.hnb-dev.baseport.net",
     health_check_path = "/api/version",
   },
   ollama = {
     ips               = [
-      "xxx.xxx.xxx.xxx",  // hybrid node IP
-      "xxx.xxx.xxx.xxx",  // hybrid node IP
-      "xxx.xxx.xxx.xxx",  // hybrid node IP
+      "10.90.1.52",
+      "10.90.2.161",
+      "10.90.3.111",
     ]
     port              = 30001,
-    subdomain         = "ollama",
+    domain            = "ollama.hnb-dev.baseport.net",
     health_check_path = "/api/version",
   },
 }

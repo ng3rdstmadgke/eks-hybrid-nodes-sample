@@ -28,9 +28,9 @@ variable subnet_ids {
   description = "LBを配置するサブネットIDのリスト"
 }
 
-variable domain {
+variable "certificate_arn" {
   type        = string
-  description = "ALBのドメイン名"
+  description = "ALBのSSL証明書ARN"
 }
 
 variable "targets" {
@@ -38,7 +38,7 @@ variable "targets" {
     object({
       ips               = list(string)
       port              = number
-      subdomain         = string
+      domain         = string
       health_check_path = string
     })
   )

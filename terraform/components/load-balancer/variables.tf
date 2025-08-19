@@ -28,9 +28,9 @@ variable "ray_nlb_port_map" {
   description = "Ray Cluster用のNLBのポートマッピング"
 }
 
-variable "alb_domain" {
-  type        = string
-  description = "ALBのドメイン名"
+variable "alb_certificate_arn" {
+  type = string
+  description = "ALBのSSL証明書ARN"
 }
 
 variable "alb_targets" {
@@ -38,7 +38,7 @@ variable "alb_targets" {
     object({
       ips = list(string),  # ALBのターゲットIP
       port = number        # ALBのターゲットポート
-      subdomain = string   # ルーティング用のサブドメイン
+      domain = string   # ルーティング用のサブドメイン
       health_check_path = string  # ヘルスチェックパス
     })
   )
