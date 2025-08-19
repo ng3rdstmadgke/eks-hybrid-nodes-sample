@@ -44,10 +44,7 @@ ping -c 3 192.168.221.130
 # 64 bytes from 192.168.221.130: icmp_seq=1 ttl=62 time=1.80 ms
 # 64 bytes from 192.168.221.130: icmp_seq=2 ttl=62 time=1.77 ms
 # 64 bytes from 192.168.221.130: icmp_seq=3 ttl=62 time=1.80 ms
-# 
-# --- 192.168.221.130 ping statistics ---
-# 3 packets transmitted, 3 received, 0% packet loss, time 2004ms
-# rtt min/avg/max/mdev = 1.774/1.790/1.801/0.011 ms
+# ...
 
 
 # ノードグループのnetshootに接続できるか
@@ -56,10 +53,7 @@ ping -c 3 192.168.142.195
 # 64 bytes from 192.168.142.195: icmp_seq=1 ttl=125 time=2.31 ms
 # 64 bytes from 192.168.142.195: icmp_seq=2 ttl=125 time=1.99 ms
 # 64 bytes from 192.168.142.195: icmp_seq=3 ttl=125 time=1.90 ms
-# 
-# --- 192.168.142.195 ping statistics ---
-# 3 packets transmitted, 3 received, 0% packet loss, time 2002ms
-# rtt min/avg/max/mdev = 1.901/2.065/2.308/0.175 ms
+# ...
 
 
 # インターネットに接続できるか
@@ -68,83 +62,26 @@ ping -c 3 8.8.8.8
 # 64 bytes from 8.8.8.8: icmp_seq=1 ttl=56 time=4.18 ms
 # 64 bytes from 8.8.8.8: icmp_seq=2 ttl=56 time=3.53 ms
 # 64 bytes from 8.8.8.8: icmp_seq=3 ttl=56 time=3.53 ms
-# 
-# --- 8.8.8.8 ping statistics ---
-# 3 packets transmitted, 3 received, 0% packet loss, time 2003ms
-# rtt min/avg/max/mdev = 3.530/3.747/4.183/0.307 ms
+# ...
+
+# resolv.conf の確認
+cat /etc/resolv.conf
+# nameserver 172.20.0.10/16
+
+# corednsでインターネットのドメインの名前解決ができることを確認
+dig +short www.google.co.jp
+# 172.217.175.35
 
 
-# corednsで名前解決ができることを確認
-dig www.google.co.jp
-# ; <<>> DiG 9.18.25 <<>> www.google.co.jp
-# ;; global options: +cmd
-# ;; Got answer:
-# ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 59909
-# ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-# 
-# ;; OPT PSEUDOSECTION:
-# ; EDNS: version: 0, flags:; udp: 1232
-# ; COOKIE: 03aea5d4f1b5a00b (echoed)
-# ;; QUESTION SECTION:
-# ;www.google.co.jp.              IN      A
-# 
-# ;; ANSWER SECTION:
-# www.google.co.jp.       30      IN      A       142.251.42.195
-# 
-# ;; Query time: 3 msec
-# ;; SERVER: 172.20.0.10#53(172.20.0.10) (UDP)
-# ;; WHEN: Thu Mar 27 14:54:02 UTC 2025
-# ;; MSG SIZE  rcvd: 89
-
-
-# KubernetesのAPIエンドポイントの名前解決ができるか
-dig XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com
-# ; <<>> DiG 9.18.25 <<>> XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com
-# ;; global options: +cmd
-# ;; Got answer:
-# ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 39529
-# ;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
-# 
-# ;; OPT PSEUDOSECTION:
-# ; EDNS: version: 0, flags:; udp: 1232
-# ; COOKIE: d23b37f8b19eb9a5 (echoed)
-# ;; QUESTION SECTION:
-# ;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com. IN A
-# 
-# ;; ANSWER SECTION:
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com. 30 IN A 10.80.3.31
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com. 30 IN A 10.80.2.245
-# 
-# ;; Query time: 4 msec
-# ;; SERVER: 172.20.0.10#53(172.20.0.10) (UDP)
-# ;; WHEN: Thu Mar 27 14:58:52 UTC 2025
-# ;; MSG SIZE  rcvd: 280
+# corednsでKubernetesのAPIエンドポイントの名前解決ができるか
+dig +short xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.gr7.ap-northeast-1.eks.amazonaws.com
+# 10.80.2.130
+# 10.80.1.63
 
 
 # Serviceの名前解決ができるか
-dig kubernetes.default.svc.cluster.local
-# ; <<>> DiG 9.18.25 <<>> kubernetes.default.svc.cluster.local
-# ;; global options: +cmd
-# ;; Got answer:
-# ;; WARNING: .local is reserved for Multicast DNS
-# ;; You are currently testing what happens when an mDNS query is leaked to DNS
-# ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 54065
-# ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-# ;; WARNING: recursion requested but not available
-# 
-# ;; OPT PSEUDOSECTION:
-# ; EDNS: version: 0, flags:; udp: 1232
-# ; COOKIE: a200a53ad5c58c13 (echoed)
-# ;; QUESTION SECTION:
-# ;kubernetes.default.svc.cluster.local. IN A
-# 
-# ;; ANSWER SECTION:
-# kubernetes.default.svc.cluster.local. 5 IN A    172.20.0.1
-# 
-# ;; Query time: 3 msec
-# ;; SERVER: 172.20.0.10#53(172.20.0.10) (UDP)
-# ;; WHEN: Thu Mar 27 15:04:00 UTC 2025
-# ;; MSG SIZE  rcvd: 129
+dig +short kubernetes.default.svc.cluster.local
+# 172.20.0.1
 
 
 # KubernetesのAPIエンドポイントにアクセスできることを確認
@@ -155,19 +92,7 @@ curl -k "https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazona
 
 curl -I "https://www.google.co.jp"
 # HTTP/2 200 
-# content-type: text/html; charset=Shift_JIS
-# content-security-policy-report-only: object-src 'none';base-uri 'self';script-src 'nonce-YgHLQvj4OUkbI0s2ENXTWA' 'strict-dynamic' 'report-sample' 'unsafe-eval' 'unsafe-inline' https: http:;report-uri https://csp.withgoogle.com/csp/gws/other-hp
-# accept-ch: Sec-CH-Prefers-Color-Scheme
-# p3p: CP="This is not a P3P policy! See g.co/p3phelp for more info."
-# date: Thu, 27 Mar 2025 15:25:40 GMT
-# server: gws
-# x-xss-protection: 0
-# x-frame-options: SAMEORIGIN
-# expires: Thu, 27 Mar 2025 15:25:40 GMT
-# cache-control: private
-# set-cookie: AEC=AVcja2e5eiGt4q4l_67eHQMPbePBMHrGn7Ptnmwk49UnzcqEHDfNtnq62Q; expires=Tue, 23-Sep-2025 15:25:40 GMT; path=/; domain=.google.co.jp; Secure; HttpOnly; SameSite=lax
-# set-cookie: NID=522=RdT19GP9MqOGbLGzYt1JDHCCl879fOFbHNbo8UEpDHlDloDtvST-Q7CJwGsONX5wqF6etfq2N4qJoxN3z5uDzSyS0TuK0jp7Sa416hGViJUw_SO6trgvLu88BIhpKsCdFUzSi-1_YOvUGST1y2w6MGNeuu38i__H5O8jy4Q2sh_0WVTQ7Q8TDoxXUcYdTMnBosyBVuNxSR_kqLM; expires=Fri, 26-Sep-2025 15:25:40 GMT; path=/; domain=.google.co.jp; HttpOnly
-# alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+# ...
 
 # ログアウト
 exit
@@ -200,10 +125,7 @@ ping -c 3 192.168.221.130
 # 64 bytes from 192.168.221.130: icmp_seq=1 ttl=62 time=1.80 ms
 # 64 bytes from 192.168.221.130: icmp_seq=2 ttl=62 time=1.77 ms
 # 64 bytes from 192.168.221.130: icmp_seq=3 ttl=62 time=1.80 ms
-# 
-# --- 192.168.221.130 ping statistics ---
-# 3 packets transmitted, 3 received, 0% packet loss, time 2004ms
-# rtt min/avg/max/mdev = 1.774/1.790/1.801/0.011 ms
+# ...
 
 
 # ノードグループのnetshootに接続できるか
@@ -212,10 +134,7 @@ ping -c 3 192.168.142.195
 # 64 bytes from 192.168.142.195: icmp_seq=1 ttl=125 time=2.31 ms
 # 64 bytes from 192.168.142.195: icmp_seq=2 ttl=125 time=1.99 ms
 # 64 bytes from 192.168.142.195: icmp_seq=3 ttl=125 time=1.90 ms
-# 
-# --- 192.168.142.195 ping statistics ---
-# 3 packets transmitted, 3 received, 0% packet loss, time 2002ms
-# rtt min/avg/max/mdev = 1.901/2.065/2.308/0.175 ms
+# ...
 
 
 # インターネットに接続できるか
@@ -224,83 +143,27 @@ ping -c 3 8.8.8.8
 # 64 bytes from 8.8.8.8: icmp_seq=1 ttl=56 time=4.18 ms
 # 64 bytes from 8.8.8.8: icmp_seq=2 ttl=56 time=3.53 ms
 # 64 bytes from 8.8.8.8: icmp_seq=3 ttl=56 time=3.53 ms
-# 
-# --- 8.8.8.8 ping statistics ---
-# 3 packets transmitted, 3 received, 0% packet loss, time 2003ms
-# rtt min/avg/max/mdev = 3.530/3.747/4.183/0.307 ms
+# ...
+
+# resolv.conf の確認
+cat /etc/resolv.conf
+# nameserver 172.20.0.10/16
+
+# corednsでインターネットのドメインの名前解決ができることを確認
+dig +short www.google.co.jp
+# 172.217.175.35
 
 
-# corednsで名前解決ができることを確認
-dig www.google.co.jp
-# ; <<>> DiG 9.18.25 <<>> www.google.co.jp
-# ;; global options: +cmd
-# ;; Got answer:
-# ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 59909
-# ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-# 
-# ;; OPT PSEUDOSECTION:
-# ; EDNS: version: 0, flags:; udp: 1232
-# ; COOKIE: 03aea5d4f1b5a00b (echoed)
-# ;; QUESTION SECTION:
-# ;www.google.co.jp.              IN      A
-# 
-# ;; ANSWER SECTION:
-# www.google.co.jp.       30      IN      A       142.251.42.195
-# 
-# ;; Query time: 3 msec
-# ;; SERVER: 172.20.0.10#53(172.20.0.10) (UDP)
-# ;; WHEN: Thu Mar 27 14:54:02 UTC 2025
-# ;; MSG SIZE  rcvd: 89
-
-
-# KubernetesのAPIエンドポイントの名前解決ができるか
-dig XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com
-# ; <<>> DiG 9.18.25 <<>> XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com
-# ;; global options: +cmd
-# ;; Got answer:
-# ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 39529
-# ;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
-# 
-# ;; OPT PSEUDOSECTION:
-# ; EDNS: version: 0, flags:; udp: 1232
-# ; COOKIE: d23b37f8b19eb9a5 (echoed)
-# ;; QUESTION SECTION:
-# ;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com. IN A
-# 
-# ;; ANSWER SECTION:
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com. 30 IN A 10.80.3.31
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazonaws.com. 30 IN A 10.80.2.245
-# 
-# ;; Query time: 4 msec
-# ;; SERVER: 172.20.0.10#53(172.20.0.10) (UDP)
-# ;; WHEN: Thu Mar 27 14:58:52 UTC 2025
-# ;; MSG SIZE  rcvd: 280
+# corednsでKubernetesのAPIエンドポイントの名前解決ができるか
+dig +short xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.gr7.ap-northeast-1.eks.amazonaws.com
+# 10.80.2.130
+# 10.80.1.63
 
 
 # Serviceの名前解決ができるか
-dig kubernetes.default.svc.cluster.local
-# ; <<>> DiG 9.18.25 <<>> kubernetes.default.svc.cluster.local
-# ;; global options: +cmd
-# ;; Got answer:
-# ;; WARNING: .local is reserved for Multicast DNS
-# ;; You are currently testing what happens when an mDNS query is leaked to DNS
-# ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 54065
-# ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-# ;; WARNING: recursion requested but not available
-# 
-# ;; OPT PSEUDOSECTION:
-# ; EDNS: version: 0, flags:; udp: 1232
-# ; COOKIE: a200a53ad5c58c13 (echoed)
-# ;; QUESTION SECTION:
-# ;kubernetes.default.svc.cluster.local. IN A
-# 
-# ;; ANSWER SECTION:
-# kubernetes.default.svc.cluster.local. 5 IN A    172.20.0.1
-# 
-# ;; Query time: 3 msec
-# ;; SERVER: 172.20.0.10#53(172.20.0.10) (UDP)
-# ;; WHEN: Thu Mar 27 15:04:00 UTC 2025
-# ;; MSG SIZE  rcvd: 129
+dig +short kubernetes.default.svc.cluster.local
+# 172.20.0.1
+
 
 
 # KubernetesのAPIエンドポイントにアクセスできることを確認
@@ -312,19 +175,7 @@ curl -k "https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.sl7.ap-northeast-1.eks.amazona
 # 外部にcurlできることを確認
 curl -I "https://www.google.co.jp"
 # HTTP/2 200 
-# content-type: text/html; charset=Shift_JIS
-# content-security-policy-report-only: object-src 'none';base-uri 'self';script-src 'nonce-s8KJmW6vVZvUiMitVpDxKQ' 'strict-dynamic' 'report-sample' 'unsafe-eval' 'unsafe-inline' https: http:;report-uri https://csp.withgoogle.com/csp/gws/other-hp
-# accept-ch: Sec-CH-Prefers-Color-Scheme
-# p3p: CP="This is not a P3P policy! See g.co/p3phelp for more info."
-# date: Thu, 27 Mar 2025 15:22:20 GMT
-# server: gws
-# x-xss-protection: 0
-# x-frame-options: SAMEORIGIN
-# expires: Thu, 27 Mar 2025 15:22:20 GMT
-# cache-control: private
-# set-cookie: AEC=AVcja2e2pOxteSluROyLXQHXp4sfJ0-t3MZSuFM4NHvrEnPlv6Spvd3jxQ; expires=Tue, 23-Sep-2025 15:22:20 GMT; path=/; domain=.google.co.jp; Secure; HttpOnly; SameSite=lax
-# set-cookie: NID=522=46N0n8Pd69cEMeD-u_ilObOU22ZHLDltCHgwMLAOzEB81wW6NecJJj1f0BNi53h54hm8cyxrR1vvg_apgJN2lvFwwu46DrDIKhqMDLgQ7JDcJwphTPbh8iv9QDpnuZ-uu-Dm5oljCzsTE0Oh19lKsWw_2Ob-BT7hwGC4tqtwR7NY65MuBxdqgSeBYQDEehVtqWTlKy3YJXybzQ; expires=Fri, 26-Sep-2025 15:22:20 GMT; path=/; domain=.google.co.jp; HttpOnly
-# alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+# ...
 
 # ログアウト
 exit

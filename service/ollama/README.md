@@ -20,34 +20,40 @@ kubectl port-forward -n ollama service/ollama-svc 80
 ヘルスチェック
 
 ```bash
-curl "http://localhost/api/version"
+BASE_URL=http://localhost
+#BASE_URL=https://ollama.hnb-dev.baseport.net
+
+curl "$BASE_URL/api/version"
 # {"version":"0.11.3"}
 ```
 
 現在稼働中のモデルを確認
 
 ```bash
-curl "http://localhost/api/ps" | jq "."
+BASE_URL=http://localhost
+#BASE_URL=https://ollama.hnb-dev.baseport.net
+
+curl "$BASE_URL/api/ps" | jq "."
 # {
 #   "models": [
 #     {
-#       "name": "gpt-oss:120b",
-#       "model": "gpt-oss:120b",
-#       "size": 75507452160,
-#       "digest": "f7f8e2f8f4e087e0e6791636dfe1a28d701d548dada674d12ef0d85ccb02a2a4",
+#       "name": "deepseek-r1:14b-qwen-distill-q4_K_M",
+#       "model": "deepseek-r1:14b-qwen-distill-q4_K_M",
+#       "size": 10384885760,
+#       "digest": "c333b7232bdb521236694ffbb5f5a6b11cc45d98e9142c73123b670fca400b09",
 #       "details": {
 #         "parent_model": "",
 #         "format": "gguf",
-#         "family": "gptoss",
+#         "family": "qwen2",
 #         "families": [
-#           "gptoss"
+#           "qwen2"
 #         ],
-#         "parameter_size": "116.8B",
-#         "quantization_level": "MXFP4"
+#         "parameter_size": "14.8B",
+#         "quantization_level": "Q4_K_M"
 #       },
-#       "expires_at": "2317-11-23T07:57:35.97001344Z",
-#       "size_vram": 75507452160,
-#       "context_length": 8192
+#       "expires_at": "2317-11-29T13:13:34.241254993Z",
+#       "size_vram": 10384885760,
+#       "context_length": 4096
 #     }
 #   ]
 # }
@@ -58,20 +64,22 @@ curl "http://localhost/api/ps" | jq "."
 
 ```bash
 MODEL_NAME=deepseek-r1:14b-qwen-distill-q4_K_M
-curl http://localhost/api/generate \
+BASE_URL=http://localhost
+#BASE_URL=https://ollama.hnb-dev.baseport.net
+
+curl "$BASE_URL/api/generate" \
   -X POST \
   -d "{
   \"model\": \"$MODEL_NAME\",
   \"prompt\":\"AIによって私たちの暮らしはどのように変わりますか?\",
   \"stream\": true
 }"
-# {"model":"llama3.1:8b-instruct-q5_K_M","created_at":"2025-07-22T13:15:24.669475132Z","response":"AI","done":false}
-# {"model":"llama3.1:8b-instruct-q5_K_M","created_at":"2025-07-22T13:15:26.4592643Z","response":"が","done":false}
-# {"model":"llama3.1:8b-instruct-q5_K_M","created_at":"2025-07-22T13:15:26.86148744Z","response":"私","done":false}
-# {"model":"llama3.1:8b-instruct-q5_K_M","created_at":"2025-07-22T13:15:27.259222378Z","response":"たちの","done":false}
-# {"model":"llama3.1:8b-instruct-q5_K_M","created_at":"2025-07-22T13:15:28.253266709Z","response":"生活","done":false}
-# {"model":"llama3.1:8b-instruct-q5_K_M","created_at":"2025-07-22T13:15:28.55763457Z","response":"を","done":false}
-# {"model":"llama3.1:8b-instruct-q5_K_M","created_at":"2025-07-22T13:15:28.953370778Z","response":"ど","done":false}
+# {"model":"deepseek-r1:14b-qwen-distill-q4_K_M","created_at":"2025-08-19T13:55:48.7529183Z","response":"\u003cthink\u003e","done":false}
+# {"model":"deepseek-r1:14b-qwen-distill-q4_K_M","created_at":"2025-08-19T13:55:48.807918377Z","response":"\n\n","done":false}
+# {"model":"deepseek-r1:14b-qwen-distill-q4_K_M","created_at":"2025-08-19T13:55:48.86355734Z","response":"\u003c/think\u003e","done":false}
+# {"model":"deepseek-r1:14b-qwen-distill-q4_K_M","created_at":"2025-08-19T13:55:48.920929462Z","response":"\n\n","done":false}
+# {"model":"deepseek-r1:14b-qwen-distill-q4_K_M","created_at":"2025-08-19T13:55:48.977829092Z","response":"AI","done":false}
+# {"model":"deepseek-r1:14b-qwen-distill-q4_K_M","created_at":"2025-08-19T13:55:49.033611772Z","response":"（","done":false}
 # ...
 ```
 

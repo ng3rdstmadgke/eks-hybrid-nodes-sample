@@ -80,14 +80,14 @@ spec:
             timeoutSeconds: 3
           resources:
             requests:
-              cpu: "4"
-              memory: "16Gi"
+              cpu: "1"
+              memory: "4Gi"
               # 1台のGPUに載りきらない場合は複数のGPUに分散される: https://github.com/ollama/ollama/blob/main/docs/faq.md#how-does-ollama-load-models-on-multiple-gpus
-              amd.com/gpu: "1"
+              nvidia.com/gpu: "1"
             limits:
-              cpu: "4"
-              memory: "16Gi"
-              amd.com/gpu: "1"
+              cpu: "1"
+              memory: "4Gi"
+              nvidia.com/gpu: "1"
           lifecycle:
             postStart:
               exec:
@@ -114,10 +114,6 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - mi-05f966535fdf6bf60  # AMD MI210x2, RAM 755GB, CPU 128コア
                   - key: eks.amazonaws.com/compute-type
                     operator: In
                     values:
