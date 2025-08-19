@@ -10,7 +10,7 @@ installation: # https://docs.tigera.io/calico/3.29/reference/installation/api#op
     bgp: Disabled
     ipPools:  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io%2fv1.IPPool
     - cidr: 192.168.0.0/16
-      blockSize: 26
+      blockSize: 24   # ハイブリッドノード1台ににつきいくつのPodを起動するかで決める。
       encapsulation: VXLAN  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io%2fv1.EncapsulationType
       natOutgoing: Enabled  # https://docs.tigera.io/calico/3.29/reference/installation/api#operator.tigera.io/v1.NATOutgoingType
       vxlanMode: Always  # https://docs.tigera.io/calico/3.29/reference/resources/ippool#spec

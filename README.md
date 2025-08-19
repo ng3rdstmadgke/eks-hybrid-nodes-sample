@@ -7,6 +7,12 @@ make tf-apply STAGE=dev COMPONENT=base
 
 # ■ ネットワークコンポーネント
 
+`terraform/components/network/tfvars/dev.tfvars`
+
+```dev.tfvars
+transit_gateway_id = "tgw-xxxxxxxxxxxxxxxxx"
+```
+
 ```bash
 make tf-plan STAGE=dev COMPONENT=network
 make tf-apply STAGE=dev COMPONENT=network

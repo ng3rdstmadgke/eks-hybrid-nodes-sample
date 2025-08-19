@@ -21,7 +21,7 @@ class ProgressActor:
             sum(self.num_samples_completed_per_task.values()) / self.total_num_samples
         )
 
-@ray.remote(num_cpus=1)
+@ray.remote(num_cpus=1, memory=4 * 1024 * 1024 * 1024) # 1 CPU, 4GB メモリ
 def sampling_task(num_samples: int, task_id: int,
                   progress_actor: ray.actor.ActorHandle) -> int:
     num_inside = 0

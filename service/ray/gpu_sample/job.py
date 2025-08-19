@@ -7,7 +7,7 @@ import os
 address = os.getenv("RAY_CLIENT_ADDR")  # 例: "ray://raycluster-kuberay-head-svc:10001"
 ray.init(address=address, runtime_env={"pip": ["cupy-cuda12x"]})
 
-@ray.remote(num_gpus=1)
+@ray.remote(num_cpus=2, num_gpus=1, memory=4 * 1024 * 1024 * 1024)  # 2 CPU, 1 GPU, 4GB メモリ
 def gpu_matrix_multiply(size):
     import cupy as cp  # GPU 上の NumPy 相当ライブラリ（CUDA が必要）
 
