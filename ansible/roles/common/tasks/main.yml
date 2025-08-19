@@ -1,4 +1,11 @@
 ##############################
+# ホスト名の設定
+##############################
+- name: rename the host
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+##############################
 # apt update & upgrade
 ##############################
 - name: Update and upgrade APT packages
