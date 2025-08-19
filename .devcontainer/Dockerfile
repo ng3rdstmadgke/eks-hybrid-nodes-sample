@@ -63,14 +63,14 @@ RUN curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases
     sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd && \
     rm argocd-linux-amd64
 
-# ansible インストール
 RUN apt-get update && apt-get install -y pipx
-ENV PIPX_HOME=/home/vscode/.local/pipx
-ENV PIPX_BIN_DIR=/home/vscode/.local/bin
+
+USER vscode
+
+# ansible インストール
 RUN pipx install --include-deps ansible~=11.3.0
 
 # Poetry インストール
-RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/home/vscode/.pypoetry python3 - && \
-    chown -R vscode:vscode /home/vscode/.pypoetry
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/home/vscode/.pypoetry python3 -
 ENV PATH="$PATH:/home/vscode/.pypoetry/bin"
 RUN poetry self add poetry-plugin-shell
