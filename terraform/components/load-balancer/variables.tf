@@ -28,7 +28,25 @@ variable "ray_nlb_port_map" {
   description = "Ray Cluster用のNLBのポートマッピング"
 }
 
+variable "alb_domain" {
+  type        = string
+  description = "ALBのドメイン名"
+}
+
+variable "alb_targets" {
+  type = map(
+    object({
+      ips = list(string),  # ALBのターゲットIP
+      port = number        # ALBのターゲットポート
+      subdomain = string   # ルーティング用のサブドメイン
+      health_check_path = string  # ヘルスチェックパス
+    })
+  )
+  description = "ALBのターゲット情報"
+}
+
 locals {
+  short_project_name = "hns"
   cluster_name = data.terraform_remote_state.cluster.outputs.cluster_name
   cluster_vpc_id = data.terraform_remote_state.network.outputs.cluster_vpc_id
   cluster_public_subnet_ids = data.terraform_remote_state.network.outputs.cluster_public_subnet_ids

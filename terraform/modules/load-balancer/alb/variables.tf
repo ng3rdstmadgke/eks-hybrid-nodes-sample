@@ -1,6 +1,16 @@
-variable alb_name {
-  type = string
-  description = "ALB名"
+variable "project_name" {
+  type        = string
+  description = "プロジェクト名"
+}
+
+variable "short_project_name" {
+  type        = string
+  description = "プロジェクト名 (短縮)"
+}
+
+variable "stage" {
+  type        = string
+  description = "ステージ名"
 }
 
 variable cluster_name {
@@ -18,12 +28,22 @@ variable subnet_ids {
   description = "LBを配置するサブネットIDのリスト"
 }
 
-variable target_ips {
-  type = list(string)
-  description = "ALBのターゲットとして登録するIPアドレスとポート"
+variable domain {
+  type        = string
+  description = "ALBのドメイン名"
 }
 
-variable target_port {
-  type = number
-  description = "ALBのターゲットとして登録するポート"
+variable "targets" {
+  type = map(
+    object({
+      ips               = list(string)
+      port              = number
+      subdomain         = string
+      health_check_path = string
+    })
+  )
+}
+
+locals {
+  alb_name = "common"
 }

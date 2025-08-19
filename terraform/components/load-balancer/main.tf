@@ -25,7 +25,7 @@ provider "aws" {
 
 module "ray_nlb" {
   source             = "../../modules/load-balancer/ray"
-  short_project_name = "ehns"
+  short_project_name = local.short_project_name
   stage              = var.stage
   cluster_name       = local.cluster_name
   vpc_id             = local.cluster_vpc_id
@@ -34,12 +34,15 @@ module "ray_nlb" {
   port_map           = var.ray_nlb_port_map
 }
 
-module "app_alb" {
-  source = "../../modules/load-balancer/alb"
-  alb_name = "HttpApp"
-  cluster_name = local.cluster_name
-  vpc_id = local.cluster_vpc_id
-  subnet_ids = local.cluster_public_subnet_ids
-  target_ips = local.hybrid_node_ips
-  target_port = 30080
+
+module "common_alb" {
+  source             = "../../modules/load-balancer/alb"
+  project_name       = var.project_name
+  short_project_name = local.short_project_name
+  stage              = var.stage
+  cluster_name       = local.cluster_name
+  vpc_id             = local.vpc_id
+  subnet_ids         = local.subnet_ids
+  domain             = var.alb_domain
+  targets            = var.alb_targets
 }
